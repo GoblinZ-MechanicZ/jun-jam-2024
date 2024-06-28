@@ -10,9 +10,9 @@ namespace GoblinzMechanics.Game
         private void OnTriggerEnter(Collider other)
         {
             RouteObject routeObject = other.GetComponentInParent<RouteObject>();
-            if(removing == routeObject) return;
-            removing = routeObject;
             if (routeObject == null) return;
+            if (removing == routeObject) return;
+            removing = routeObject;
             routeController.DestroyBehind();
         }
     }

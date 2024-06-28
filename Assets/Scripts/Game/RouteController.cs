@@ -11,6 +11,7 @@ namespace GoblinzMechanics.Game
     {
         [SerializeField] private bool _autoExpandPool = false;
 
+        [SerializeField] private int _startLength = 6;
         [SerializeField] private int _routeShowLength = 13;
 
         [SerializeField] private float _routePartLength = 1f;
@@ -53,6 +54,10 @@ namespace GoblinzMechanics.Game
                 if (_routeObjects.Count < 1)
                 {
                     AddFirst();
+                    for (int i = 0; i < _startLength; i++)
+                    {
+                        AddForward(true);
+                    }
                 }
                 else if (_routeObjects.Count < _routeShowLength)
                 {
@@ -62,7 +67,7 @@ namespace GoblinzMechanics.Game
                     }
                 }
 
-                _routeParent.position += Vector3.back * _routeSpeed * _routeSpeedModificator * Time.deltaTime;
+                _routeParent.position += _routeSpeed * _routeSpeedModificator * Time.deltaTime * Vector3.back;
                 yield return null;
             }
         }
@@ -77,19 +82,23 @@ namespace GoblinzMechanics.Game
 
         private void AddFirst()
         {
-            RouteObject routeObject = TakeFromPool(GetByChance());
-            routeObject.transform.position = Vector3.zero - Vector3.up * _routeFloorThickness + Vector3.back * _routePartLength;
-            routeObject.transform.rotation = Quaternion.identity;
-
+            RouteObject routeObject = TakeFromPool(_routeObjectPrefabs[0]);
+            routeObject.transform.SetPositionAndRotation(Vector3.zero - Vector3.up * _routeFloorThickness + Vector3.back * _routePartLength, Quaternion.identity);
             _routeObjects.Add(routeObject);
         }
 
-        private void AddForward()
+        private void AddForward(bool asFirst = false)
         {
-            RouteObject routeObject = TakeFromPool(GetByChance());
-            routeObject.transform.position = _routeObjects[_routeObjects.Count - 1].transform.position + Vector3.forward * _routePartLength;
-            routeObject.transform.rotation = Quaternion.identity;
-
+            RouteObject routeObject;
+            if (asFirst)
+            {
+                routeObject = TakeFromPool(_routeObjectPrefabs[0]);
+            }
+            else
+            {
+                routeObject = TakeFromPool(GetByChance());
+            }
+            routeObject.transform.SetPositionAndRotation(_routeObjects[^1].transform.position + Vector3.forward * _routePartLength, Quaternion.identity);
             _routeObjects.Add(routeObject);
         }
 
@@ -101,15 +110,6 @@ namespace GoblinzMechanics.Game
             ReleasePoolObject(routeObj);
 
             _routeObjects.RemoveAt(0);
-        }
-
-        private void DestroyAllInstance()
-        {
-            for (int i = 0; i < _routeObjects.Count; i++)
-            {
-                Destroy(_routeObjects[i].gameObject);
-            }
-            _routeObjects.Clear();
         }
 
         private void ClearPool()
@@ -128,11 +128,13 @@ namespace GoblinzMechanics.Game
                 for (int i = 0; i < _routeShowLength; i++)
                 {
                     RouteObject routeObject = Instantiate(prefab, Vector3.zero, Quaternion.identity, _routePool);
+
                     routeObject.gameObject.SetActive(false);
                     if (_routeObjectsPool.ContainsKey(prefab.id))
                     {
                         _routeObjectsPool[prefab.id].Enqueue(routeObject);
-                    } else
+                    }
+                    else
                     {
                         var queue = new Queue<RouteObject>();
                         queue.Enqueue(routeObject);
@@ -169,11 +171,10 @@ namespace GoblinzMechanics.Game
             routeObject.transform.parent = _routePool;
             if (_routeObjectsPool.ContainsKey(routeObject.id))
             {
-                Debug.Log($"Object: {routeObject} Released");
                 _routeObjectsPool[routeObject.id].Enqueue(routeObject);
             }
         }
-        
+
         private RouteObject GetByChance()
         {
             float chance = Random.Range(0f, __totalChance);
@@ -183,13 +184,10 @@ namespace GoblinzMechanics.Game
                     chance -= route.routeChance;
                     return chance <= 0f;
                 });
-            
+
             if (result == null)
             {
                 result = _routeObjectPrefabs[0];
-                Debug.Log($"Result = GetDefault 0, Chance = {chance}");
-            } else {
-                Debug.Log($"Result = {result.name}, Chance = {chance}");
             }
             return result;
         }
