@@ -5,6 +5,10 @@ TagManager:
   serializedVersion: 3
   tags:
   - floor
+  - obstacle
+  - bonus
+  - mathAnswer
+  - coin
   layers:
   - Default
   - TransparentFX
