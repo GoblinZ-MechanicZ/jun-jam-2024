@@ -165,18 +165,20 @@ MonoBehaviour:
   _autoExpandPool: 0
   _startLength: 6
   _routeShowLength: 13
-  _routePartLength: 6
   _routeFloorThickness: 0.2
   _routeSpeed: 10
-  _routeSpeedModificator: 1
+  routeSpeedModificator: 1
   _routeParent: {fileID: 1806177893}
   _routePool: {fileID: 396590773}
+  _mathRouteObjectPrefab: {fileID: 0}
+  _mathRouteObjectInstance: {fileID: 0}
   _routeObjectPrefabs:
   - {fileID: 9176492033296787385, guid: 39fa0b6861a5f0347bb340d4bb71ba74, type: 3}
   - {fileID: 9176492033296787385, guid: 998a31fb6d84a1541a20e22f5e04542f, type: 3}
   - {fileID: 9176492033296787385, guid: 171889e76b0b03645ad514d51b1c94e9, type: 3}
   - {fileID: 9176492033296787385, guid: 75298456bfe39ee4dace7931a9851447, type: 3}
   _routeObjects: []
+  routeCounter: 0
 --- !u!1 &270693075
 GameObject:
   m_ObjectHideFlags: 0
@@ -1077,6 +1079,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _body: {fileID: 488336970}
   _floorCheckTime: 0.2
+  _dieNormalZ: -0.8
+  _dieNormalY: 0.5
 --- !u!136 &488336972
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -1365,7 +1369,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e94a12fd3ccbd0c418fbc22a79830d5d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  routeController: {fileID: 6751849}
 --- !u!65 &1524740263
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1500,7 +1503,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4fccc452e7adbf448adc7d4cf13f61bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _gameState: 1
 --- !u!4 &1811905177
 Transform:
   m_ObjectHideFlags: 0
