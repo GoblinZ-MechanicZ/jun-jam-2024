@@ -162,6 +162,8 @@ MonoBehaviour:
   routeChance: 100
   id: 898
   length: 6
+  isRotate: 0
+  _caveModule: {fileID: 0}
 --- !u!54 &3544654963452158284
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -992,8 +994,7 @@ MonoBehaviour:
   _leftAnswer: {fileID: 6527777863247551971}
   _middleAnswer: {fileID: 9013786063896703034}
   _rightAnswer: {fileID: 7134167441635317435}
-  _emptySpace: {fileID: 9176492033296787385, guid: 39fa0b6861a5f0347bb340d4bb71ba74,
-    type: 3}
+  _emptySpace: {fileID: 0}
   firstObject: {fileID: 2640426926810924238}
   lastObject: {fileID: 8692569154370198001}
   routeObjects:
@@ -1338,6 +1339,8 @@ MonoBehaviour:
   routeChance: 100
   id: 898
   length: 6
+  isRotate: 0
+  _caveModule: {fileID: 0}
 --- !u!54 &7869969101762198643
 Rigidbody:
   m_ObjectHideFlags: 0
