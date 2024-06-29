@@ -10,6 +10,8 @@ namespace GoblinzMechanics.Game
         public int id = 99;
         public float length = 6;
         public MathRouteSubClass example;
+
+        [SerializeField] private int _minLength = 5;
         [SerializeField] private TMP_Text _exampleText;
         [SerializeField] private TMP_Text _leftText;
         [SerializeField] private TMP_Text _middleText;
@@ -17,85 +19,98 @@ namespace GoblinzMechanics.Game
         [SerializeField] private MathAnswerTrigger _leftAnswer;
         [SerializeField] private MathAnswerTrigger _middleAnswer;
         [SerializeField] private MathAnswerTrigger _rightAnswer;
-        public List<RouteObject> routeObjects = new List<RouteObject>();
+        [SerializeField] private RouteObject _emptySpace;
+        [SerializeField] private RouteObject firstObject;
+        [SerializeField] private RouteObject lastObject;
+
+        public List<RouteObject> routeObjects = new();
 
         private void Awake()
         {
-            switch (Random.Range(0, 101))
+            RouteObject routeObject, prevRouteObject;
+            routeObjects.Clear();
+            routeObjects.Add(firstObject);
+            for (int i = 0; i < _minLength * RouteController.Instance.routeSpeedModificator; i++)
             {
-                case 0:
-                case 25:
-                    example = new MathDivClass();
-                    break;
-                case 26:
-                case 50:
-                    example = new MathMultClass();
-                    break;
-                case 51:
-                case 75:
-                    example = new MathSubClass();
-                    break;
-                case 76:
-                case 100:
-                    example = new MathAddClass();
-                    break;
-                default:
-                    example = new MathAddClass();
-                    break;
+                routeObject = Instantiate(_emptySpace, transform);
+                routeObject.id = 898;
+                prevRouteObject = routeObjects[^1];
+                routeObject.transform.SetPositionAndRotation(prevRouteObject.transform.position + Vector3.forward * prevRouteObject.length, Quaternion.identity);
+                routeObjects.Add(routeObject);
             }
+
+            prevRouteObject = routeObjects[^1];
+            lastObject.transform.SetPositionAndRotation(prevRouteObject.transform.position + Vector3.forward * prevRouteObject.length, Quaternion.identity);
+            routeObjects.Add(lastObject);
+
+            example = Random.Range(0, 101) switch
+            {
+                >= 0 and < 25 => new MathDivClass(),
+                >= 25 and < 50 => new MathMultClass(),
+                >= 50 and < 75 => new MathSubClass(),
+                >= 75 and <= 100 => new MathAddClass(),
+                _ => new MathAddClass(),
+            };
             _exampleText.text = $"{example.variableA} {example.sign} {example.variableB} = ...";
             SetAnswers();
         }
 
         private void SetAnswers()
         {
+            int varLeft, varRight, varMiddle;
+
+            varLeft = example.GetRandom();
+            varMiddle = example.GetRandom();
+            varRight = example.GetRandom();
+
             switch (Random.Range(0, 3))
             {
                 case 0:
-                    _leftText.text = $"{example.variableR}";
-                    _middleText.text = $"{example.GetRandom()}";
-                    _rightText.text = $"{example.GetRandom()}";
+                    varLeft = example.variableR;
                     _leftAnswer.isValid = true;
                     _middleAnswer.isValid = false;
                     _rightAnswer.isValid = false;
                     break;
                 case 1:
-                    _leftText.text = $"{example.GetRandom()}";
-                    _middleText.text = $"{example.variableR}";
-                    _rightText.text = $"{example.GetRandom()}";
+                    varMiddle = example.variableR;
                     _leftAnswer.isValid = false;
                     _middleAnswer.isValid = true;
                     _rightAnswer.isValid = false;
                     break;
                 case 2:
-                    _leftText.text = $"{example.GetRandom()}";
-                    _middleText.text = $"{example.GetRandom()}";
-                    _rightText.text = $"{example.variableR}";
+                    varRight = example.variableR;
                     _leftAnswer.isValid = false;
                     _middleAnswer.isValid = false;
                     _rightAnswer.isValid = true;
                     break;
             }
 
+            _leftAnswer.value = varLeft;
+            _middleAnswer.value = varMiddle;
+            _rightAnswer.value = varRight;
+
+            _leftText.text = $"{varLeft}";
+            _middleText.text = $"{varMiddle}";
+            _rightText.text = $"{varRight}";
+
         }
     }
 
     public abstract class MathRouteSubClass
     {
-        public float variableA;
-        public float variableB;
-        public float variableR;
+        public int variableA;
+        public int variableB;
+        public int variableR;
         public char sign;
         public MathRouteSubClass()
         {
-            variableA = Mathf.RoundToInt(Random.Range(0, 101));
-            variableB = Mathf.RoundToInt(Random.Range(0, 101));
+            variableA = Mathf.RoundToInt(Random.Range(1, 10));
+            variableB = Mathf.RoundToInt(Random.Range(0, 10));
         }
 
         public virtual int GetRandom()
         {
-            int result = 0;
-            result = Random.Range(0, (int)((variableA > variableB) ? variableA : variableB) * 2);
+            int result = variableR + Random.Range(1, ((variableA >= variableB) ? variableA : variableB) / 2);
             return result;
         }
     }
@@ -112,6 +127,10 @@ namespace GoblinzMechanics.Game
     {
         public MathSubClass() : base()
         {
+            if (variableA < variableB)
+            {
+                (variableB, variableA) = (variableA, variableB);
+            }
             variableR = variableA - variableB;
             sign = '-';
         }
@@ -120,8 +139,8 @@ namespace GoblinzMechanics.Game
     {
         public MathMultClass() : base()
         {
-            variableA = Mathf.RoundToInt(Random.Range(0, 26));
-            variableB = Mathf.RoundToInt(Random.Range(0, 26));
+            variableA = Mathf.RoundToInt(Random.Range(1, 10));
+            variableB = Mathf.RoundToInt(Random.Range(0, 10));
             variableR = variableA * variableB;
             sign = '*';
         }
@@ -130,10 +149,15 @@ namespace GoblinzMechanics.Game
     {
         public MathDivClass() : base()
         {
-            variableA = Mathf.RoundToInt(Random.Range(0, 101));
-            variableB = Mathf.RoundToInt(Random.Range(1, 101));
-            variableR = variableA / variableB;
+            variableB = Random.Range(1, 10);
+            variableR = Random.Range(1, 10);
+            variableA = variableR * variableB;
             sign = '/';
+        }
+        public override int GetRandom()
+        {
+            int result = variableR + Random.Range(1, variableB / 2);
+            return result;
         }
     }
 }

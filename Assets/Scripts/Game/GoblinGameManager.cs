@@ -111,5 +111,15 @@ namespace GoblinzMechanics.Game
             }
             // GameState = GameStateEnum.Ended;
         }
+
+        private MathRouteSubClass __prevExample;
+        public void HandleMathAnswer(MathAnswerTrigger trigger, MathRouteSubClass example)
+        {
+            if (__prevExample != example)
+            {
+                Debug.Log($"Получен {(trigger.isValid ? "" : "не")}верный ответ: {trigger.value}; пример: {example.variableA} {example.sign} {example.variableB} = {example.variableR}");
+                __prevExample = example;
+            }
+        }
     }
 }

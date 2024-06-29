@@ -46,6 +46,7 @@ namespace GoblinzMechanics
         private void OnTriggerEnter(Collider other)
         {
             HandleJumpTriggerEnter(other);
+            HandleMathAnswer(other);
         }
 
         private void OnTriggerExit(Collider other)
@@ -55,7 +56,7 @@ namespace GoblinzMechanics
 
         private void OnCollisionEnter(Collision other)
         {
-            if (other.collider.tag == "Untagged") return;
+            if (!other.collider.CompareTag("obstacle")) return;
 
             if (other.contacts[0].normal.z <= _dieNormalZ && other.contacts[0].normal.y <= _dieNormalY)
             {
@@ -95,7 +96,7 @@ namespace GoblinzMechanics
 
         private void HandleJumpTriggerEnter(Collider other)
         {
-            if (other.tag != "floor") return;
+            if (!other.CompareTag("floor")) return;
             _inTriggerTime = 0f;
             _inTrigger = true;
             _isJumping = false;
@@ -103,10 +104,24 @@ namespace GoblinzMechanics
 
         private void HandleJumpTriggerExit(Collider other)
         {
-            if (other.tag != "floor") return;
+            if (!other.CompareTag("floor")) return;
             _inTriggerTime = 0f;
             _inTrigger = false;
         }
 
+        private void HandleMathAnswer(Collider other)
+        {
+            if (!other.CompareTag("mathAnswer")) return;
+
+            if (other.TryGetComponent<MathAnswerTrigger>(out var trigger))
+            {
+                MathRouteObject mathRouteObject = other.GetComponentInParent<MathRouteObject>();
+
+                if (mathRouteObject != null)
+                {
+                    GoblinGameManager.Instance.HandleMathAnswer(trigger, mathRouteObject.example);
+                }
+            }
+        }
     }
 }

@@ -5,5 +5,6 @@ namespace GoblinzMechanics.Game
     public class MathAnswerTrigger : MonoBehaviour
     {
         public bool isValid = false;
+        public int value = 0;
     }
 }
