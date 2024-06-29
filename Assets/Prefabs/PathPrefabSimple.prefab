@@ -212,7 +212,7 @@ MonoBehaviour:
   id: 0
   length: 6
   isRotate: 0
-  _caveModule: {fileID: 2725293753754234791}
+  _caveModule: {fileID: 0}
 --- !u!54 &7695798846303912507
 Rigidbody:
   m_ObjectHideFlags: 0
