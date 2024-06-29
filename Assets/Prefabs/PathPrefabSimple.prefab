@@ -590,6 +590,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8895c4e5a0e3a104f9033d706ac4bf79, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  routeChance: 100
+  id: 0
+  length: 6
 --- !u!54 &7695798846303912507
 Rigidbody:
   m_ObjectHideFlags: 0

@@ -4,32 +4,40 @@ namespace GoblinzMechanics.Game
     using System.Collections.Generic;
     using System.Data.Common;
     using System.Linq;
+    using GoblinzMechanics.Utils;
     using UnityEngine;
     using UnityEngine.Pool;
 
-    public class RouteController : MonoBehaviour
+    public class RouteController : Singleton<RouteController>
     {
         [SerializeField] private bool _autoExpandPool = false;
 
         [SerializeField] private int _startLength = 6;
         [SerializeField] private int _routeShowLength = 13;
 
-        [SerializeField] private float _routePartLength = 1f;
         [SerializeField] private float _routeFloorThickness = 0.2f;
         [SerializeField] private float _routeSpeed = 10f;
-        [SerializeField] private float _routeSpeedModificator = 1f;
+
+        public float routeSpeedModificator = 1f;
 
         [SerializeField] private Transform _routeParent;
         [SerializeField] private Transform _routePool;
+
+        [SerializeField] private MathRouteObject _mathRouteObjectPrefab;
+        [SerializeField] private MathRouteObject _mathRouteObjectInstance;
 
         [SerializeField] private List<RouteObject> _routeObjectPrefabs = new List<RouteObject>();
         [SerializeField] private List<RouteObject> _routeObjects = new List<RouteObject>();
 
         [SerializeField] private Dictionary<int, Queue<RouteObject>> _routeObjectsPool = new Dictionary<int, Queue<RouteObject>>();
 
+        public int routeCounter = 0;
+
         private Coroutine pathMovement;
 
         private float __totalChance = 0f;
+
+        private bool _mathAdd = false;
 
         private void OnEnable()
         {
@@ -44,12 +52,14 @@ namespace GoblinzMechanics.Game
             ClearPool();
             FillPool();
 
+            routeCounter = 0;
+
             pathMovement = StartCoroutine(MovePath());
         }
 
         private IEnumerator MovePath()
         {
-            while (GoblinGameManager.Instance.GameState == GoblinGameManager.GameStateEnum.Playing)
+            while (GoblinGameManager.Instance.GameState != GoblinGameManager.GameStateEnum.Ended)
             {
                 if (_routeObjects.Count < 1)
                 {
@@ -66,8 +76,14 @@ namespace GoblinzMechanics.Game
                         AddForward();
                     }
                 }
+                if (GoblinGameManager.Instance.GameState != GoblinGameManager.GameStateEnum.Playing)
+                {
+                    yield return null;
+                    continue;
+                }
+                _routeParent.position += _routeSpeed * routeSpeedModificator * Time.deltaTime * Vector3.back;
+                _mathAdd = _mathRouteObjectInstance == null && routeCounter > 0 && (int)(routeCounter % (12 * routeSpeedModificator)) == 0;
 
-                _routeParent.position += _routeSpeed * _routeSpeedModificator * Time.deltaTime * Vector3.back;
                 yield return null;
             }
         }
@@ -83,31 +99,58 @@ namespace GoblinzMechanics.Game
         private void AddFirst()
         {
             RouteObject routeObject = TakeFromPool(_routeObjectPrefabs[0]);
-            routeObject.transform.SetPositionAndRotation(Vector3.zero - Vector3.up * _routeFloorThickness + Vector3.back * _routePartLength, Quaternion.identity);
+            routeObject.transform.SetPositionAndRotation(Vector3.zero - Vector3.up * _routeFloorThickness + Vector3.back * routeObject.length, Quaternion.identity);
             _routeObjects.Add(routeObject);
         }
 
         private void AddForward(bool asFirst = false)
         {
-            RouteObject routeObject;
-            if (asFirst)
+            RouteObject routeObject, _prevRouteObject;
+            if (asFirst || !_mathAdd)
             {
-                routeObject = TakeFromPool(_routeObjectPrefabs[0]);
+                if (asFirst)
+                {
+                    routeObject = TakeFromPool(_routeObjectPrefabs[0]);
+                }
+                else
+                {
+                    routeObject = TakeFromPool(GetByChance());
+                }
+                _prevRouteObject = _routeObjects[^1];
+                routeObject.transform.SetPositionAndRotation(_prevRouteObject.transform.position + Vector3.forward * _prevRouteObject.length, Quaternion.identity);
+                _routeObjects.Add(routeObject);
             }
-            else
+            else if (_mathAdd)
             {
-                routeObject = TakeFromPool(GetByChance());
+                _mathRouteObjectInstance = Instantiate(_mathRouteObjectPrefab, _routeParent);
+                _prevRouteObject = _routeObjects[^1];
+                _mathRouteObjectInstance.transform.SetPositionAndRotation(_prevRouteObject.transform.position + Vector3.forward * _prevRouteObject.length, Quaternion.identity);
+                _routeObjects.AddRange(_mathRouteObjectInstance.routeObjects);
+                _mathAdd = false;
             }
-            routeObject.transform.SetPositionAndRotation(_routeObjects[^1].transform.position + Vector3.forward * _routePartLength, Quaternion.identity);
-            _routeObjects.Add(routeObject);
         }
 
+        private int _prevRemovedId;
         public void DestroyBehind()
         {
             if (_routeObjects.Count < 1) return;
 
             RouteObject routeObj = _routeObjects[0];
-            ReleasePoolObject(routeObj);
+            if (routeObj.id != 898) // removing ID
+            {
+                ReleasePoolObject(routeObj);
+                routeCounter++;
+                if (_prevRemovedId == 898)
+                {
+                    Destroy(_mathRouteObjectInstance.gameObject);
+                }
+                _prevRemovedId = routeObj.id;
+            }
+            else
+            {
+                _prevRemovedId = routeObj.id;
+                Destroy(routeObj.gameObject);
+            }
 
             _routeObjects.RemoveAt(0);
         }

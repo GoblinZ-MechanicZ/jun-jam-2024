@@ -4,7 +4,6 @@ namespace GoblinzMechanics.Game
 
     public class PathRemover : MonoBehaviour
     {
-        [SerializeField] private RouteController routeController;
         private RouteObject removing;
 
         private void OnTriggerEnter(Collider other)
@@ -13,7 +12,7 @@ namespace GoblinzMechanics.Game
             if (routeObject == null) return;
             if (removing == routeObject) return;
             removing = routeObject;
-            routeController.DestroyBehind();
+            RouteController.Instance.DestroyBehind();
         }
     }
 }
