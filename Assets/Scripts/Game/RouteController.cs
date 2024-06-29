@@ -83,7 +83,7 @@ namespace GoblinzMechanics.Game
                 }
                 _routeParent.position += _routeSpeed * routeSpeedModificator * Time.deltaTime * Vector3.back;
                 _mathAdd = _mathRouteObjectInstance == null && routeCounter > 0 && (int)(routeCounter % (12 * routeSpeedModificator)) == 0;
-
+                GoblinGameManager.Instance.stats.maxSpeed = _routeSpeed * routeSpeedModificator * Time.deltaTime;
                 yield return null;
             }
         }
@@ -117,6 +117,7 @@ namespace GoblinzMechanics.Game
                     routeObject = TakeFromPool(GetByChance());
                 }
                 _prevRouteObject = _routeObjects[^1];
+                routeObject.Init(!_prevRouteObject.isRotate);
                 routeObject.transform.SetPositionAndRotation(_prevRouteObject.transform.position + Vector3.forward * _prevRouteObject.length, Quaternion.identity);
                 _routeObjects.Add(routeObject);
             }

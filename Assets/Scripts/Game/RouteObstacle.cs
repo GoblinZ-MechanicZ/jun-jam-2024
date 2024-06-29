@@ -5,7 +5,5 @@ namespace GoblinzMechanics.Game
     public class RouteObstacle : MonoBehaviour
     {
         [SerializeField] private float sidePositions = 2f;
-
-        [SerializeField] private RouteObject.ObjectOnRoutePosition position;
     }
 }

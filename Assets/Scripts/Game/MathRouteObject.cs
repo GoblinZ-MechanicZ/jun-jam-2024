@@ -35,6 +35,7 @@ namespace GoblinzMechanics.Game
                 routeObject = Instantiate(_emptySpace, transform);
                 routeObject.id = 898;
                 prevRouteObject = routeObjects[^1];
+                routeObject.Init(!prevRouteObject.isRotate);
                 routeObject.transform.SetPositionAndRotation(prevRouteObject.transform.position + Vector3.forward * prevRouteObject.length, Quaternion.identity);
                 routeObjects.Add(routeObject);
             }
@@ -106,6 +107,10 @@ namespace GoblinzMechanics.Game
         {
             variableA = Mathf.RoundToInt(Random.Range(1, 10));
             variableB = Mathf.RoundToInt(Random.Range(0, 10));
+        }
+
+        public string GetExampleString() {
+            return $"{variableA} {sign} {variableB} = {variableR}";
         }
 
         public virtual int GetRandom()
