@@ -301,7 +301,6 @@ Transform:
   - {fileID: 8352324828546041549}
   - {fileID: 299839083360585242}
   - {fileID: 9185137571494349631}
-  - {fileID: 6215149968578974582}
   - {fileID: 308117355710689974}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -320,6 +319,8 @@ MonoBehaviour:
   routeChance: 25
   id: 5
   length: 6
+  isRotate: 0
+  _caveModule: {fileID: 308117355710689974}
 --- !u!54 &7695798846303912507
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -382,7 +383,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 2455476191956257327}
+  m_Father: {fileID: 308117355710689974}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &6094262867967669432
 MeshFilter:
@@ -5339,7 +5340,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: cdfae33aa8f57904ea0afbacc716fc56,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6215149968578974582}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: cdfae33aa8f57904ea0afbacc716fc56, type: 3}
 --- !u!4 &308117355710689974 stripped

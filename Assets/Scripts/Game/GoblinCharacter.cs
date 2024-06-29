@@ -22,7 +22,6 @@ namespace GoblinzMechanics
         {
             GoblinGameManager.Instance.OnStateChanged += (newState) =>
             {
-                _body.useGravity = newState == GoblinGameManager.GameStateEnum.Playing;
                 _characterAnimator.SetBool("Win", newState != GoblinGameManager.GameStateEnum.Playing);
             };
         }
@@ -55,7 +54,7 @@ namespace GoblinzMechanics
             if (other.contacts[0].normal.z <= _dieNormalZ && other.contacts[0].normal.y <= _dieNormalY)
             {
                 _characterAnimator.SetBool("Death", true);
-                GoblinGameManager.Instance.EndGame(true);
+                GoblinGameManager.Instance.EndGame(false);
             }
         }
 

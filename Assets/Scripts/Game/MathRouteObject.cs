@@ -28,8 +28,6 @@ namespace GoblinzMechanics.Game
         private void Awake()
         {
             RouteObject routeObject, prevRouteObject;
-            routeObjects.Clear();
-            routeObjects.Add(firstObject);
             for (int i = 0; i < _minLength * RouteController.Instance.routeSpeedModificator; i++)
             {
                 routeObject = Instantiate(_emptySpace, transform);

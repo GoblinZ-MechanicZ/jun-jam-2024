@@ -5,13 +5,15 @@ namespace GoblinzMechanics.Game
     using TMPro;
     using UnityEngine.InputSystem;
     using UnityEngine.Events;
-    using System;
     using UnityEngine.Rendering;
     using UnityEngine.Rendering.HighDefinition;
+    using System;
+    using UnityEngine.SceneManagement;
+    using System.Collections;
+    using System.IO;
 
     public class GoblinGameManager : Singleton<GoblinGameManager>
     {
-        [System.Serializable]
         public enum GameStateEnum
         {
             NotStarted,
@@ -21,8 +23,10 @@ namespace GoblinzMechanics.Game
 
         [SerializeField] private GameStateEnum _gameState = GameStateEnum.NotStarted;
         [SerializeField] private float routeSpeedIncrease = 0.01f;
-        [SerializeField] private TMP_Text _runnedDistance;
+        [SerializeField] private TMP_Text _scoreText;
+        [SerializeField] private TMP_Text _endGameText;
         [SerializeField] private GameObject _prepareUI;
+        [SerializeField] private GameObject _EndGameUI;
         [SerializeField] private Transform _pathRoot;
         [SerializeField] private InputActionAsset playerControls;
         [SerializeField] private VolumeProfile _globalProfile;
@@ -33,7 +37,7 @@ namespace GoblinzMechanics.Game
         [SerializeField] private float _vignetteDecreaseSpeed = 0.25f;
         private Vignette _vignette;
 
-        public GoblinGameStats stats;
+        public GoblinGameStats stats => GoblinGameStats.Instance;
 
         public GameStateEnum GameState
         {
@@ -51,9 +55,14 @@ namespace GoblinzMechanics.Game
         public Action<GameStateEnum> OnStateChanged;
 
         public UnityEvent OnAnyKeyPressed;
+        public UnityEvent OnWin;
+        public UnityEvent OnDeath;
+
+        private bool isWin = false;
 
         private void Awake()
         {
+
             Application.runInBackground = true;
             GameState = GameStateEnum.NotStarted;
             if (_globalProfile.TryGet(out _vignette))
@@ -80,26 +89,28 @@ namespace GoblinzMechanics.Game
 
         private void OnDisable()
         {
-            if (_runnedDistance != null)
+            _vignette.intensity.value = 0.25f;
+            _vignette.color.value = _baseColor;
+            if (_scoreText != null)
             {
-                _runnedDistance.gameObject.SetActive(false);
+                _scoreText.gameObject.SetActive(false);
             }
             playerControls["PressAnyKey"].started -= OnAnyKey;
         }
 
         private void Update()
         {
+            HandleVignette();
             if (GameState != GameStateEnum.Playing) { return; }
-            _runnedDistance.text = $"{stats.Score}"; //\n{(int)(RouteController.Instance.routeCounter % (12 * RouteController.Instance.routeSpeedModificator))}
+            _scoreText.text = $"{stats.Score}"; //\n{(int)(RouteController.Instance.routeCounter % (12 * RouteController.Instance.routeSpeedModificator))}
             RouteController.Instance.routeSpeedModificator += routeSpeedIncrease * Time.deltaTime;
             stats.runnedMeters = -Mathf.RoundToInt(_pathRoot.position.z);
-            HandleVignette();
         }
 
         private void ShowStartUI()
         {
             OnAnyKeyPressed.AddListener(StartGame);
-            _runnedDistance.gameObject.SetActive(false);
+            _scoreText.gameObject.SetActive(false);
             _prepareUI.SetActive(true);
         }
 
@@ -112,20 +123,57 @@ namespace GoblinzMechanics.Game
         {
             OnAnyKeyPressed.RemoveListener(StartGame);
             _prepareUI.SetActive(false);
+            _EndGameUI.SetActive(false);
             GameState = GameStateEnum.Playing;
-            _runnedDistance.gameObject.SetActive(true);
-
+            _scoreText.gameObject.SetActive(true);
+            isWin = false;
         }
 
-        public void EndGame(bool isDie)
+        public void RestartGame()
         {
-            if (isDie)
+            _EndGameUI.SetActive(false);
+            stats.Reset();
+            if (isWin)
             {
-                Debug.Log($"Вы запутались в математическом подземелье и не нашли выход! Ваш счет: {_runnedDistance.text}");
+                stats.currentLevel++;
             }
+            else
+            {
+                stats.currentLevel = 1;
+            }
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
+
+        private void TakeScreen()
+        {
+            string path,directoryPath;
+#if UNITY_EDITOR
+            path = $"Screenshots/Screenshot-{DateTime.Now:dd-MM-yy--HH-mm-ss}.png";
+#else
+            path = $"{Application.dataPath}/Screenshots/Screenshot-{DateTime.Now:dd-MM-yy--HH-mm-ss}.png";
+#endif
+            directoryPath = Path.GetDirectoryName(path);
+            if(!Directory.Exists(Path.GetDirectoryName(directoryPath))) {
+                Directory.CreateDirectory(directoryPath);
+            }
+            ScreenCapture.CaptureScreenshot(path);
+        }
+
+        public void EndGame(bool _isWin)
+        {
+            if (!_isWin)
+            {
+                Debug.Log($"Вы запутались в математическом подземелье и не нашли выход! Ваш счет: {_scoreText.text}");
+                OnDeath?.Invoke();
+            }
+            else
+            {
+                isWin = true;
+                OnWin?.Invoke();
+            }
+            ShowEndUI(isWin);
             GameState = GameStateEnum.Ended;
-            _vignette.intensity.value = 0.25f;
-            _vignette.color.value = _baseColor;
+            TakeScreen();
         }
 
         private MathRouteSubClass __prevExample;
@@ -138,19 +186,19 @@ namespace GoblinzMechanics.Game
                 stats.examples.Add($"Example: {example.GetExampleString()} : Answered: {trigger.value}");
                 if (trigger.isValid)
                 {
-                    stats.examplesSolved++;
-                    stats.Score += stats.scoreAdd;
-
                     _vignette.intensity.value = 1f;
                     _vignette.color.value = _rightColor;
+
+                    stats.examplesSolved++;
+                    stats.Score += stats.scoreAdd;
                 }
                 else
                 {
-                    stats.examplesFailed++;
-                    stats.Score -= stats.scoreAdd;
-
                     _vignette.intensity.value = 1f;
                     _vignette.color.value = _wrongColor;
+
+                    stats.examplesFailed++;
+                    stats.Score -= stats.scoreAdd;
                 }
             }
         }
@@ -169,6 +217,28 @@ namespace GoblinzMechanics.Game
             {
                 _vignette.color.value = _baseColor;
             }
+        }
+
+        [SerializeField] private string _endGameTextFormat = "ЫЫЫыть {0}!\nУровень: {1}\nТвоя стата:\nРешил примеры правильно: {2}\nРешил примеры неправильно: {3}\nПробежал: {4} м\nСтырил монет: {5}\nМаксимальный счет: {6}";
+
+        private void ShowEndUI(bool isWin)
+        {
+            _EndGameUI.SetActive(true);
+            _endGameText.text = string.Format(_endGameTextFormat,
+                                              GetWinMsg(isWin),
+                                              stats.currentLevel,
+                                              stats.examplesSolved,
+                                              stats.examplesFailed,
+                                              stats.runnedMeters,
+                                              stats.collectedCoins,
+                                              stats.maxScore
+                                              );
+            Debug.Log($"Твои примеры за этот уровень ({stats.currentLevel}) \n{string.Join(";\n", stats.examples)}");
+        }
+
+        private string GetWinMsg(bool isWin)
+        {
+            return isWin ? "Победа" : "Проигрышь";
         }
     }
 }

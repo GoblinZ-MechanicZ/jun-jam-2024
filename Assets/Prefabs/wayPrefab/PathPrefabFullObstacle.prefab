@@ -371,8 +371,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   routeChance: 15
-  id: 2
+  id: 6
   length: 6
+  isRotate: 0
+  _caveModule: {fileID: 5400034977330780864}
 --- !u!54 &7869679100783118235
 Rigidbody:
   m_ObjectHideFlags: 0
