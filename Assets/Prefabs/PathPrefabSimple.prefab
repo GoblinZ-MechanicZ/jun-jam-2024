@@ -211,6 +211,8 @@ MonoBehaviour:
   routeChance: 100
   id: 0
   length: 6
+  isRotate: 0
+  _caveModule: {fileID: 2725293753754234791}
 --- !u!54 &7695798846303912507
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -269,12 +271,12 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 3b28c340509c56a4d8c22f896336b538,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3b28c340509c56a4d8c22f896336b538,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0
+      value: -0.00000013411044
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3b28c340509c56a4d8c22f896336b538,
         type: 3}

@@ -30,7 +30,10 @@ namespace GoblinzMechanics.Game
         private Color _baseColor;
         [SerializeField] private Color _wrongColor;
         [SerializeField] private Color _rightColor;
+        [SerializeField] private float _vignetteDecreaseSpeed = 0.25f;
         private Vignette _vignette;
+
+        public GoblinGameStats stats;
 
         public GameStateEnum GameState
         {
@@ -53,7 +56,8 @@ namespace GoblinzMechanics.Game
         {
             Application.runInBackground = true;
             GameState = GameStateEnum.NotStarted;
-            if(_globalProfile.TryGet(out _vignette)) {
+            if (_globalProfile.TryGet(out _vignette))
+            {
                 _baseColor = _vignette.color.value;
             }
 
@@ -85,9 +89,10 @@ namespace GoblinzMechanics.Game
 
         private void Update()
         {
-            _runnedDistance.text = $"{-Mathf.RoundToInt(_pathRoot.position.z)} М\n{(int)(RouteController.Instance.routeCounter % (12 * RouteController.Instance.routeSpeedModificator))}";
             if (GameState != GameStateEnum.Playing) { return; }
+            _runnedDistance.text = $"{stats.Score}"; //\n{(int)(RouteController.Instance.routeCounter % (12 * RouteController.Instance.routeSpeedModificator))}
             RouteController.Instance.routeSpeedModificator += routeSpeedIncrease * Time.deltaTime;
+            stats.runnedMeters = -Mathf.RoundToInt(_pathRoot.position.z);
             HandleVignette();
         }
 
@@ -119,6 +124,8 @@ namespace GoblinzMechanics.Game
                 Debug.Log($"Вы запутались в математическом подземелье и не нашли выход! Ваш счет: {_runnedDistance.text}");
             }
             GameState = GameStateEnum.Ended;
+            _vignette.intensity.value = 0.25f;
+            _vignette.color.value = _baseColor;
         }
 
         private MathRouteSubClass __prevExample;
@@ -128,16 +135,40 @@ namespace GoblinzMechanics.Game
             {
                 Debug.Log($"Получен {(trigger.isValid ? "" : "не")}верный ответ: {trigger.value}; пример: {example.variableA} {example.sign} {example.variableB} = {example.variableR}");
                 __prevExample = example;
+                stats.examples.Add($"Example: {example.GetExampleString()} : Answered: {trigger.value}");
+                if (trigger.isValid)
+                {
+                    stats.examplesSolved++;
+                    stats.Score += stats.scoreAdd;
+
+                    _vignette.intensity.value = 1f;
+                    _vignette.color.value = _rightColor;
+                }
+                else
+                {
+                    stats.examplesFailed++;
+                    stats.Score -= stats.scoreAdd;
+
+                    _vignette.intensity.value = 1f;
+                    _vignette.color.value = _wrongColor;
+                }
             }
         }
 
         public void HandleCoin(int value)
         {
             Debug.Log($"Ха-ха! Очередная монетка падет в мои карманцы!");
+            stats.collectedCoins += value;
+            stats.Score += value;
         }
 
-        public void HandleVignette() {
-            _vignette.intensity.value = 0.25f * RouteController.Instance.routeSpeedModificator;
+        public void HandleVignette()
+        {
+            _vignette.intensity.value = Mathf.Clamp(_vignette.intensity.value - _vignetteDecreaseSpeed * Time.deltaTime, 0.25f, 1);
+            if (_vignette.intensity.value == 0.25)
+            {
+                _vignette.color.value = _baseColor;
+            }
         }
     }
 }

@@ -1977,6 +1977,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1811905177}
   - component: {fileID: 1811905176}
+  - component: {fileID: 1811905178}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -2004,8 +2005,10 @@ MonoBehaviour:
   playerControls: {fileID: -944628639613478452, guid: 45e134c6b37de0842abeff3901148cf1,
     type: 3}
   _globalProfile: {fileID: 11400000, guid: dff08978fdcbc5f459af59aa3816fa77, type: 2}
-  _wrongColor: {r: 0, g: 0, b: 0, a: 0}
-  _rightColor: {r: 0, g: 0, b: 0, a: 0}
+  _wrongColor: {r: 1, g: 0, b: 0, a: 0}
+  _rightColor: {r: 0, g: 1, b: 0, a: 0}
+  _vignetteDecreaseSpeed: 1
+  stats: {fileID: 1811905178}
   OnAnyKeyPressed:
     m_PersistentCalls:
       m_Calls: []
@@ -2024,6 +2027,27 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1811905178
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1811905175}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0022e323bb076be4ba5ec31e38e0762a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  examples: []
+  examplesSolved: 0
+  examplesFailed: 0
+  runnedMeters: 0
+  collectedCoins: 0
+  maxSpeed: 0
+  maxDistanceToBolder: 0
+  maxScore: 0
+  scoreAdd: 10
 --- !u!1 &1914835395 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 50df86bb129e1214d9cd5c7840df71d1,
