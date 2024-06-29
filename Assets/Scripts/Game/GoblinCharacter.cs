@@ -2,7 +2,6 @@ namespace GoblinzMechanics
 {
     using GoblinzMechanics.Game;
     using UnityEngine;
-    using UnityEditor;
     using UnityEngine.InputSystem;
 
     public class GoblinCharacter : MonoBehaviour
@@ -11,6 +10,7 @@ namespace GoblinzMechanics
         [SerializeField] private float _floorCheckTime = 0.2f;
         [SerializeField] private float _dieNormalZ = -0.8f;
         [SerializeField] private float _dieNormalY = 0.5f;
+        [SerializeField] private Animator _characterAnimator;
 
         private float _inTriggerTime = 0f;
         private bool _inTrigger = false;
@@ -20,17 +20,10 @@ namespace GoblinzMechanics
 
         private void OnEnable()
         {
-            GoblinGameManager.Instance.OnStateChanged += () =>
+            GoblinGameManager.Instance.OnStateChanged += (newState) =>
             {
-                if (GoblinGameManager.Instance.GameState != GoblinGameManager.GameStateEnum.Playing)
-                {
-                    _body.useGravity = false;
-                    return;
-                }
-                else
-                {
-                    _body.useGravity = true;
-                }
+                _body.useGravity = newState == GoblinGameManager.GameStateEnum.Playing;
+                _characterAnimator.SetBool("Win", newState != GoblinGameManager.GameStateEnum.Playing);
             };
         }
 
@@ -47,6 +40,7 @@ namespace GoblinzMechanics
         {
             HandleJumpTriggerEnter(other);
             HandleMathAnswer(other);
+            HandleCoin(other);
         }
 
         private void OnTriggerExit(Collider other)
@@ -60,6 +54,7 @@ namespace GoblinzMechanics
 
             if (other.contacts[0].normal.z <= _dieNormalZ && other.contacts[0].normal.y <= _dieNormalY)
             {
+                _characterAnimator.SetBool("Death", true);
                 GoblinGameManager.Instance.EndGame(true);
             }
         }
@@ -68,15 +63,17 @@ namespace GoblinzMechanics
         {
             if (GoblinGameManager.Instance.GameState != GoblinGameManager.GameStateEnum.Playing) return;
             if (_isJumping) return;
+            _characterAnimator.SetBool("Jumping", true);
 
             _body.AddForce(force, ForceMode.Impulse);
             _isJumping = true;
         }
 
-        public void Move(Vector3 newPos)
+        public void Move(Vector3 newPos, float xMovement)
         {
             if (GoblinGameManager.Instance.GameState != GoblinGameManager.GameStateEnum.Playing) return;
             if (_isJumping) return;
+            _characterAnimator.SetInteger("XMovement", (int)xMovement);
             transform.position = newPos;
         }
 
@@ -100,6 +97,7 @@ namespace GoblinzMechanics
             _inTriggerTime = 0f;
             _inTrigger = true;
             _isJumping = false;
+            _characterAnimator.SetBool("Jumping", false);
         }
 
         private void HandleJumpTriggerExit(Collider other)
@@ -121,6 +119,17 @@ namespace GoblinzMechanics
                 {
                     GoblinGameManager.Instance.HandleMathAnswer(trigger, mathRouteObject.example);
                 }
+            }
+        }
+
+        private void HandleCoin(Collider other)
+        {
+            if (!other.CompareTag("coin")) return;
+
+            if (other.TryGetComponent<GoblinCoin>(out var coin))
+            {
+                GoblinGameManager.Instance.HandleCoin(coin.value);
+                coin.DestroyCoin();
             }
         }
     }

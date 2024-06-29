@@ -6,6 +6,8 @@ namespace GoblinzMechanics.Game
     using UnityEngine.InputSystem;
     using UnityEngine.Events;
     using System;
+    using UnityEngine.Rendering;
+    using UnityEngine.Rendering.HighDefinition;
 
     public class GoblinGameManager : Singleton<GoblinGameManager>
     {
@@ -22,8 +24,13 @@ namespace GoblinzMechanics.Game
         [SerializeField] private TMP_Text _runnedDistance;
         [SerializeField] private GameObject _prepareUI;
         [SerializeField] private Transform _pathRoot;
-
         [SerializeField] private InputActionAsset playerControls;
+        [SerializeField] private VolumeProfile _globalProfile;
+
+        private Color _baseColor;
+        [SerializeField] private Color _wrongColor;
+        [SerializeField] private Color _rightColor;
+        private Vignette _vignette;
 
         public GameStateEnum GameState
         {
@@ -33,12 +40,12 @@ namespace GoblinzMechanics.Game
             }
             private set
             {
-                OnStateChanged?.Invoke();
+                OnStateChanged?.Invoke(value);
                 _gameState = value;
             }
         }
 
-        public Action OnStateChanged;
+        public Action<GameStateEnum> OnStateChanged;
 
         public UnityEvent OnAnyKeyPressed;
 
@@ -46,8 +53,9 @@ namespace GoblinzMechanics.Game
         {
             Application.runInBackground = true;
             GameState = GameStateEnum.NotStarted;
-
-            ShowStartUI();
+            if(_globalProfile.TryGet(out _vignette)) {
+                _baseColor = _vignette.color.value;
+            }
 
             if (!playerControls.enabled)
             {
@@ -80,6 +88,7 @@ namespace GoblinzMechanics.Game
             _runnedDistance.text = $"{-Mathf.RoundToInt(_pathRoot.position.z)} М\n{(int)(RouteController.Instance.routeCounter % (12 * RouteController.Instance.routeSpeedModificator))}";
             if (GameState != GameStateEnum.Playing) { return; }
             RouteController.Instance.routeSpeedModificator += routeSpeedIncrease * Time.deltaTime;
+            HandleVignette();
         }
 
         private void ShowStartUI()
@@ -109,7 +118,7 @@ namespace GoblinzMechanics.Game
             {
                 Debug.Log($"Вы запутались в математическом подземелье и не нашли выход! Ваш счет: {_runnedDistance.text}");
             }
-            // GameState = GameStateEnum.Ended;
+            GameState = GameStateEnum.Ended;
         }
 
         private MathRouteSubClass __prevExample;
@@ -120,6 +129,15 @@ namespace GoblinzMechanics.Game
                 Debug.Log($"Получен {(trigger.isValid ? "" : "не")}верный ответ: {trigger.value}; пример: {example.variableA} {example.sign} {example.variableB} = {example.variableR}");
                 __prevExample = example;
             }
+        }
+
+        public void HandleCoin(int value)
+        {
+            Debug.Log($"Ха-ха! Очередная монетка падет в мои карманцы!");
+        }
+
+        public void HandleVignette() {
+            _vignette.intensity.value = 0.25f * RouteController.Instance.routeSpeedModificator;
         }
     }
 }

@@ -59,13 +59,13 @@ namespace GoblinzMechanics.Game
             HandleMovement();
         }
 
-        private void HandleMovement()
+        private void HandleMovement() 
         {
             _velocity.Set(_movementInput * _characterMoveSpeed * Time.deltaTime, 0, 0);
 
             _character.Move(new Vector3(Mathf.Clamp(_character.transform.position.x + _velocity.x, -_sideMaxDistance, _sideMaxDistance),
                                     _character.transform.position.y,
-                                    _character.transform.position.z));
+                                    _character.transform.position.z), _movementInput);
         }
 
         private void OnMovement(InputAction.CallbackContext context)
