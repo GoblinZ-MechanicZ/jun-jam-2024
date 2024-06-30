@@ -7,13 +7,23 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: ceiling
+    second: {fileID: 2100000, guid: 5b1c19138c0c5fa4e8ad10d8d3406ad0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: floor
+    second: {fileID: 2100000, guid: 0f5c4fd07048ff74fb68fab4b6292b23, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: link
     second: {fileID: 2100000, guid: 7c86800b726934b4a88fbeaafafe591c, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: stone
-    second: {fileID: 2100000, guid: 77b104635eb82154592134dbf582b38c, type: 2}
+      name: wall
+    second: {fileID: 2100000, guid: b9380807d0bd57c44ac80ab806895d7e, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
