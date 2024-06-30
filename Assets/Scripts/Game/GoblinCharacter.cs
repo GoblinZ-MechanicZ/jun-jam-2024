@@ -17,11 +17,26 @@ namespace GoblinzMechanics.Game
 
         public bool IsGrounded => _inTriggerTime >= _floorCheckTime;
 
+        private Vector3 _oldLinVelocity, _oldAngVelocity;
         private void OnEnable()
         {
             GoblinGameManager.Instance.OnStateChanged += (newState) =>
             {
-                _characterAnimator.SetBool("Win", newState != GoblinGameManager.GameStateEnum.Playing);
+                if (newState == GoblinGameManager.GameStateEnum.Pause)
+                {
+                    _characterAnimator.speed = 0f;
+                    _oldLinVelocity = _body.linearVelocity;
+                    _oldAngVelocity = _body.angularVelocity;
+                    _body.isKinematic = true;
+                }
+                else
+                {
+                    _characterAnimator.speed = 1f;
+                    _body.isKinematic = false;
+                    _body.linearVelocity = _oldLinVelocity;
+                    _body.angularVelocity = _oldAngVelocity;
+                    _characterAnimator.SetBool("Win", (newState != GoblinGameManager.GameStateEnum.Playing));
+                }
             };
         }
 
@@ -33,7 +48,7 @@ namespace GoblinzMechanics.Game
                 _inTriggerTime += Time.deltaTime;
             }
 
-            if (GoblinGameManager.Instance.GameState != GoblinGameManager.GameStateEnum.Playing)
+            if (GoblinGameManager.Instance.GameState == GoblinGameManager.GameStateEnum.Playing)
             {
                 _characterAnimator.SetFloat("BDistance", GoblinGameStats.Instance.DistanceToBolder);
             }
@@ -64,8 +79,8 @@ namespace GoblinzMechanics.Game
 
         public void Jump(Vector3 force)
         {
-            if (GoblinGameManager.Instance.GameState != GoblinGameManager.GameStateEnum.Playing) return;
             if (_isJumping) return;
+            if (GoblinGameManager.Instance.GameState != GoblinGameManager.GameStateEnum.Playing) return;
             _characterAnimator.SetBool("Jumping", true);
 
             _body.AddForce(force, ForceMode.Impulse);
@@ -74,8 +89,8 @@ namespace GoblinzMechanics.Game
 
         public void Move(Vector3 newPos, float xMovement)
         {
-            if (GoblinGameManager.Instance.GameState != GoblinGameManager.GameStateEnum.Playing) return;
             if (_isJumping) return;
+            if (GoblinGameManager.Instance.GameState != GoblinGameManager.GameStateEnum.Playing) return;
             _characterAnimator.SetInteger("XMovement", (int)xMovement);
             transform.position = newPos;
         }
@@ -136,11 +151,21 @@ namespace GoblinzMechanics.Game
             }
         }
 
-        internal void LookBack()
+        public void LookSwitch()
         {
-            if (GoblinGameManager.Instance.GameState != GoblinGameManager.GameStateEnum.Playing) return;
             if (_isJumping) return;
+            if (GoblinGameManager.Instance.GameState != GoblinGameManager.GameStateEnum.Playing) return;
             _characterAnimator.SetBool("LookBack", !_characterAnimator.GetBool("LookBack"));
+        }
+
+        public void LookBack()
+        {
+            _characterAnimator.SetBool("LookBack", true);
+        }
+
+        public void LookNormal()
+        {
+            _characterAnimator.SetBool("LookBack", false);
         }
     }
 }

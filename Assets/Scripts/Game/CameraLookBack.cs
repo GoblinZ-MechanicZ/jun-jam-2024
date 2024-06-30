@@ -10,31 +10,50 @@ namespace GoblinzMechanics.Game
 
         [SerializeField] private InputActionAsset inputActions;
 
-        private void OnEnable() {
+        private void OnEnable()
+        {
             inputActions["LookBack"].started += StartLoockBack;
             lookBack = true;
             LookBack();
         }
-        
-        private void OnDisable() {
+
+        private void OnDisable()
+        {
             inputActions["LookBack"].started -= StartLoockBack;
         }
 
-        private void StartLoockBack(InputAction.CallbackContext context) {
-            if(lookBack) {
-                LookNormal();
-            } else {
-                LookBack();
+        public void LookNormal()
+        {
+            lookBack = false;
+            LookNormalAnim();
+        }
+
+        public void LookBack()
+        {
+            lookBack = true;
+            LookBackAnim();
+        }
+
+        private void StartLoockBack(InputAction.CallbackContext context)
+        {
+            if (GoblinGameManager.Instance.GameState != GoblinGameManager.GameStateEnum.Playing) { return; }
+            if (lookBack)
+            {
+                LookNormalAnim();
+            }
+            else
+            {
+                LookBackAnim();
             }
             lookBack = !lookBack;
         }
 
-        private void LookBack()
+        private void LookBackAnim()
         {
             _animation.Play("CameraLookBack");
         }
 
-        private void LookNormal()
+        private void LookNormalAnim()
         {
             _animation.Play("CameraLookNormal");
         }

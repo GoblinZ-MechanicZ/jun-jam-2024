@@ -1,9 +1,10 @@
 namespace GoblinzMechanics.Game
 {
+    using GoblinzMechanics.Utils;
     using UnityEngine;
     using UnityEngine.InputSystem;
 
-    public class GoblinCharacterController : MonoBehaviour
+    public class GoblinCharacterController : Singleton<GoblinCharacterController>
     {
         [SerializeField] private GoblinCharacter _character;
         [SerializeField] private float _sideMaxDistance = 2.4f;
@@ -33,7 +34,7 @@ namespace GoblinzMechanics.Game
             _playerControls[_crouchActionName].started += OnCrouch;
             _playerControls[_crouchActionName].performed += OnCrouch;
             _playerControls[_crouchActionName].canceled += OnCrouch;
-            
+
             _playerControls["LookBack"].started += StartLoockBack;
         }
 
@@ -60,11 +61,27 @@ namespace GoblinzMechanics.Game
             HandleMovement();
         }
 
-        private void StartLoockBack(InputAction.CallbackContext context) {
+        private void StartLoockBack(InputAction.CallbackContext context)
+        {
+            LookSwitch();
+        }
+
+        public void LookSwitch()
+        {
+            _character.LookSwitch();
+        }
+
+        public void LookBack()
+        {
             _character.LookBack();
         }
 
-        private void HandleMovement() 
+        public void LookNormal()
+        {
+            _character.LookNormal();
+        }
+
+        private void HandleMovement()
         {
             _velocity.Set(_movementInput * _characterMoveSpeed * Time.deltaTime, 0, 0);
 
