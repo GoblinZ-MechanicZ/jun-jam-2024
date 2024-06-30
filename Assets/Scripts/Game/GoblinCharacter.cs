@@ -1,5 +1,6 @@
 namespace GoblinzMechanics
 {
+    using System;
     using GoblinzMechanics.Game;
     using UnityEngine;
     using UnityEngine.InputSystem;
@@ -32,6 +33,10 @@ namespace GoblinzMechanics
             if (_inTrigger)
             {
                 _inTriggerTime += Time.deltaTime;
+            }
+
+            if(GoblinGameManager.Instance.GameState != GoblinGameManager.GameStateEnum.Playing) {
+                _characterAnimator.SetFloat("BDistance", GoblinGameStats.Instance.DistanceToBolder);
             }
         }
 
@@ -130,6 +135,13 @@ namespace GoblinzMechanics
                 GoblinGameManager.Instance.HandleCoin(coin.value);
                 coin.DestroyCoin();
             }
+        }
+
+        internal void LookBack()
+        {
+            if (GoblinGameManager.Instance.GameState != GoblinGameManager.GameStateEnum.Playing) return;
+            if (_isJumping) return;
+            _characterAnimator.SetBool("LookBack", !_characterAnimator.GetBool("LookBack"));
         }
     }
 }

@@ -15,6 +15,7 @@ namespace GoblinzMechanics
         public float maxDistanceToBolder = 0f;
         private int _score = 0;
         private float _speed = 0;
+        private float _distanceToBolder = 0;
         public int Score {
             get {
                 return _score;
@@ -23,6 +24,7 @@ namespace GoblinzMechanics
                 if(value > maxScore) {
                     maxScore = value;
                 }
+                _score = value;
 
                 if(value < 0) {
                     GoblinGameManager.Instance.EndGame(false);
@@ -30,7 +32,6 @@ namespace GoblinzMechanics
                     GoblinGameManager.Instance.EndGame(true);
                 }
 
-                _score = value;
             }
         }
         public float Speed {
@@ -44,6 +45,19 @@ namespace GoblinzMechanics
                 _speed = value;
             }
         }
+
+        public float DistanceToBolder {
+            get {
+                return _distanceToBolder;
+            }
+            set {
+                if(value > maxDistanceToBolder) {
+                    maxDistanceToBolder = value;
+                }
+
+                _distanceToBolder = value;
+            }
+        }
         public int maxScore;
         public float maxSpeed;
         public int scoreAdd = 10;
@@ -53,6 +67,12 @@ namespace GoblinzMechanics
         public int currentLevel = 1;
         public int levelScoreNeed = 100;
         public int WinScore => currentLevel * levelScoreNeed;
+
+        private void Awake() {
+            if(Instance != null && Instance != this) {
+                Destroy(gameObject);
+            }
+        }
 
         public void Reset() {
             examples.Clear();

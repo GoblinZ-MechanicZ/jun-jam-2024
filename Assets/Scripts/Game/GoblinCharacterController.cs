@@ -36,6 +36,8 @@ namespace GoblinzMechanics.Game
             _playerControls[_crouchActionName].started += OnCrouch;
             _playerControls[_crouchActionName].performed += OnCrouch;
             _playerControls[_crouchActionName].canceled += OnCrouch;
+            
+            _playerControls["LookBack"].started += StartLoockBack;
         }
 
         private void OnDisable()
@@ -52,11 +54,17 @@ namespace GoblinzMechanics.Game
             _playerControls[_crouchActionName].started -= OnCrouch;
             _playerControls[_crouchActionName].performed -= OnCrouch;
             _playerControls[_crouchActionName].canceled -= OnCrouch;
+
+            _playerControls["LookBack"].started -= StartLoockBack;
         }
 
         private void FixedUpdate()
         {
             HandleMovement();
+        }
+
+        private void StartLoockBack(InputAction.CallbackContext context) {
+            _character.LookBack();
         }
 
         private void HandleMovement() 

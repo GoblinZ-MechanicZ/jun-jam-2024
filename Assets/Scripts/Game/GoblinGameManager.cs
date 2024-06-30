@@ -52,13 +52,15 @@ namespace GoblinzMechanics.Game
             }
         }
 
+        public bool IsWin { get ; internal set; }
+
         public Action<GameStateEnum> OnStateChanged;
 
         public UnityEvent OnAnyKeyPressed;
         public UnityEvent OnWin;
         public UnityEvent OnDeath;
 
-        private bool isWin = false;
+        private bool _isWin = false;
 
         private void Awake()
         {
@@ -126,14 +128,14 @@ namespace GoblinzMechanics.Game
             _EndGameUI.SetActive(false);
             GameState = GameStateEnum.Playing;
             _scoreText.gameObject.SetActive(true);
-            isWin = false;
+            _isWin = false;
         }
 
         public void RestartGame()
         {
             _EndGameUI.SetActive(false);
             stats.Reset();
-            if (isWin)
+            if (_isWin)
             {
                 stats.currentLevel++;
             }
@@ -159,19 +161,19 @@ namespace GoblinzMechanics.Game
             ScreenCapture.CaptureScreenshot(path);
         }
 
-        public void EndGame(bool _isWin)
+        public void EndGame(bool isWin)
         {
-            if (!_isWin)
+            if (!isWin)
             {
                 Debug.Log($"Вы запутались в математическом подземелье и не нашли выход! Ваш счет: {_scoreText.text}");
                 OnDeath?.Invoke();
             }
             else
             {
-                isWin = true;
+                _isWin = true;
                 OnWin?.Invoke();
             }
-            ShowEndUI(isWin);
+            ShowEndUI(_isWin);
             GameState = GameStateEnum.Ended;
             TakeScreen();
         }
@@ -191,6 +193,8 @@ namespace GoblinzMechanics.Game
 
                     stats.examplesSolved++;
                     stats.Score += stats.scoreAdd;
+
+                    RouteController.Instance.routeSpeedModificator += 0.02f;
                 }
                 else
                 {
@@ -199,6 +203,8 @@ namespace GoblinzMechanics.Game
 
                     stats.examplesFailed++;
                     stats.Score -= stats.scoreAdd;
+
+                    RouteController.Instance.routeSpeedModificator -= 0.2f;
                 }
             }
         }
@@ -219,11 +225,16 @@ namespace GoblinzMechanics.Game
             }
         }
 
-        [SerializeField] private string _endGameTextFormat = "ЫЫЫыть {0}!\nУровень: {1}\nТвоя стата:\nРешил примеры правильно: {2}\nРешил примеры неправильно: {3}\nПробежал: {4} м\nСтырил монет: {5}\nМаксимальный счет: {6}";
+        [SerializeField] private string _endGameTextFormat = "ЫЫЫыть {0}!\nУровень: {1}\nТвоя стата:\nРешил примеры правильно: {2}\nРешил примеры неправильно: {3}\nПробежал: {4} м\nСтырил монет: {5}\nМаксимальный счет: {6}\nМаксимальное расстояние от булыги: {7} м";
 
         private void ShowEndUI(bool isWin)
         {
             _EndGameUI.SetActive(true);
+            
+            if (_scoreText != null)
+            {
+                _scoreText.gameObject.SetActive(false);
+            }
             _endGameText.text = string.Format(_endGameTextFormat,
                                               GetWinMsg(isWin),
                                               stats.currentLevel,
@@ -231,7 +242,8 @@ namespace GoblinzMechanics.Game
                                               stats.examplesFailed,
                                               stats.runnedMeters,
                                               stats.collectedCoins,
-                                              stats.maxScore
+                                              stats.maxScore,
+                                              stats.maxDistanceToBolder
                                               );
             Debug.Log($"Твои примеры за этот уровень ({stats.currentLevel}) \n{string.Join(";\n", stats.examples)}");
         }

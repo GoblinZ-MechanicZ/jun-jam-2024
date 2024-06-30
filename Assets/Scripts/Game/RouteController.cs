@@ -83,7 +83,7 @@ namespace GoblinzMechanics.Game
                 }
                 _routeParent.position += _routeSpeed * routeSpeedModificator * Time.deltaTime * Vector3.back;
                 _mathAdd = _mathRouteObjectInstance == null && routeCounter > 0 && (int)(routeCounter % (12 * routeSpeedModificator)) == 0;
-                GoblinGameManager.Instance.stats.maxSpeed = _routeSpeed * routeSpeedModificator;
+                GoblinGameStats.Instance.maxSpeed = _routeSpeed * routeSpeedModificator;
                 yield return null;
             }
         }
