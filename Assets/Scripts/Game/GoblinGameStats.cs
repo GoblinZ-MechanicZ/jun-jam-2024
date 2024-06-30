@@ -62,6 +62,8 @@ namespace GoblinzMechanics
         public float maxSpeed;
         public int scoreAdd = 10;
 
+        public bool fistPlay = true;
+
         [Space()]
         [Header("WinCondition")]
         public int currentLevel = 1;

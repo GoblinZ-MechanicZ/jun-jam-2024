@@ -22,7 +22,7 @@ namespace GoblinzMechanics.Game
 
         public IEnumerator StartGamePlay()
         {
-            if (GoblinGameStats.InstanceNonNull)
+            if (GoblinGameStats.InstanceNonNull && !GoblinGameStats.Instance.fistPlay)
             {
                 OnAllComicsDone?.Invoke();
                 yield break;
