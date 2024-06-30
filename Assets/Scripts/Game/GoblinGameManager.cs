@@ -36,7 +36,6 @@ namespace GoblinzMechanics.Game
         [SerializeField] private Color _rightColor;
         [SerializeField] private float _vignetteDecreaseSpeed = 0.25f;
         private Vignette _vignette;
-
         public GoblinGameStats stats => GoblinGameStats.Instance;
         public CameraSettings CameraSettingsVar;
 
@@ -63,9 +62,13 @@ namespace GoblinzMechanics.Game
 
         private bool _isWin = false;
 
+        private void OnDestroy() {
+            CameraSettingsVar.Enabled = false;
+        }
+
         private void Awake()
         {
-
+            CameraSettingsVar.Enabled = true;
             Application.runInBackground = true;
             GameState = GameStateEnum.NotStarted;
             if (_globalProfile.TryGet(out _vignette))

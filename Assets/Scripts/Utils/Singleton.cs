@@ -22,5 +22,7 @@ namespace GoblinzMechanics.Utils
                 return _instance;
             }
         }
+
+        public static bool InstanceNonNull { get { return _instance != null; } }
     }
 }

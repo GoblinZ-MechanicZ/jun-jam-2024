@@ -6,7 +6,7 @@ namespace GoblinzMechanics.Game
 
     public sealed class CameraSettingsController : CustomPostProcessVolumeComponent, IPostProcessComponent
     {
-        public CameraSettings _cameraSettings => GoblinGameManager.Instance.CameraSettingsVar;
+        public CameraSettings _cameraSettings => (GoblinGameManager.InstanceNonNull) ? GoblinGameManager.Instance.CameraSettingsVar : null;
         Material m_Material;
         public bool IsActive() => m_Material != null && _cameraSettings != null && _cameraSettings.Enabled;
         public override CustomPostProcessInjectionPoint injectionPoint => CustomPostProcessInjectionPoint.BeforePostProcess;
