@@ -11,7 +11,6 @@ namespace GoblinzMechanics.Game
         [SerializeField] private float _characterJumpForce = 5f;
 
         [SerializeField] private InputActionAsset _playerControls;
-
         private string _moveActionName = "Move";
         private string _jumpActionName = "Jump";
         private string _crouchActionName = "Crouch";
@@ -19,7 +18,6 @@ namespace GoblinzMechanics.Game
         private float _movementInput;
 
         private Vector3 _velocity;
-
 
         private void OnEnable()
         {

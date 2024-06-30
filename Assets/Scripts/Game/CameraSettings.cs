@@ -10,7 +10,6 @@ namespace GoblinzMechanics.Game
         public float Contrast = 1f;
         public float HUE = 0f;
         public bool Enabled = true;
-
     }
 
 }
