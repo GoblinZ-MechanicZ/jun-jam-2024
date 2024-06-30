@@ -23,6 +23,7 @@ namespace GoblinzMechanics.Game
         private void Update()
         {
             if (GoblinGameManager.Instance.GameState == GoblinGameManager.GameStateEnum.NotStarted) return;
+            if (GoblinGameManager.Instance.GameState == GoblinGameManager.GameStateEnum.Pause) return;
             if (GoblinGameManager.Instance.GameState == GoblinGameManager.GameStateEnum.Ended && GoblinGameManager.Instance.IsWin) return;
 
             _bolderSpeed += _bolderSpeedModificator * Time.deltaTime;
