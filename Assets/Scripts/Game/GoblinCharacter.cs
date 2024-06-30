@@ -1,7 +1,5 @@
-namespace GoblinzMechanics
+namespace GoblinzMechanics.Game
 {
-    using System;
-    using GoblinzMechanics.Game;
     using UnityEngine;
     using UnityEngine.InputSystem;
 
@@ -35,7 +33,8 @@ namespace GoblinzMechanics
                 _inTriggerTime += Time.deltaTime;
             }
 
-            if(GoblinGameManager.Instance.GameState != GoblinGameManager.GameStateEnum.Playing) {
+            if (GoblinGameManager.Instance.GameState != GoblinGameManager.GameStateEnum.Playing)
+            {
                 _characterAnimator.SetFloat("BDistance", GoblinGameStats.Instance.DistanceToBolder);
             }
         }

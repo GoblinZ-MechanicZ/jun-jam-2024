@@ -38,6 +38,7 @@ namespace GoblinzMechanics.Game
         private Vignette _vignette;
 
         public GoblinGameStats stats => GoblinGameStats.Instance;
+        public CameraSettings CameraSettingsVar;
 
         public GameStateEnum GameState
         {
@@ -52,7 +53,7 @@ namespace GoblinzMechanics.Game
             }
         }
 
-        public bool IsWin { get ; internal set; }
+        public bool IsWin { get; internal set; }
 
         public Action<GameStateEnum> OnStateChanged;
 
@@ -148,14 +149,15 @@ namespace GoblinzMechanics.Game
 
         private void TakeScreen()
         {
-            string path,directoryPath;
+            string path, directoryPath;
 #if UNITY_EDITOR
             path = $"Screenshots/Screenshot-{DateTime.Now:dd-MM-yy--HH-mm-ss}.png";
 #else
             path = $"{Application.dataPath}/Screenshots/Screenshot-{DateTime.Now:dd-MM-yy--HH-mm-ss}.png";
 #endif
             directoryPath = Path.GetDirectoryName(path);
-            if(!Directory.Exists(Path.GetDirectoryName(directoryPath))) {
+            if (!Directory.Exists(Path.GetDirectoryName(directoryPath)))
+            {
                 Directory.CreateDirectory(directoryPath);
             }
             ScreenCapture.CaptureScreenshot(path);
@@ -175,7 +177,6 @@ namespace GoblinzMechanics.Game
             }
             ShowEndUI(_isWin);
             GameState = GameStateEnum.Ended;
-            TakeScreen();
         }
 
         private MathRouteSubClass __prevExample;
@@ -226,26 +227,38 @@ namespace GoblinzMechanics.Game
         }
 
         [SerializeField] private string _endGameTextFormat = "ЫЫЫыть {0}!\nУровень: {1}\nТвоя стата:\nРешил примеры правильно: {2}\nРешил примеры неправильно: {3}\nПробежал: {4} м\nСтырил монет: {5}\nМаксимальный счет: {6}\nМаксимальное расстояние от булыги: {7} м";
-
         private void ShowEndUI(bool isWin)
         {
-            _EndGameUI.SetActive(true);
-            
+            StartCoroutine(PlayShowEndUI(isWin));
+        }
+        private IEnumerator PlayShowEndUI(bool isWin)
+        {
             if (_scoreText != null)
             {
                 _scoreText.gameObject.SetActive(false);
             }
             _endGameText.text = string.Format(_endGameTextFormat,
-                                              GetWinMsg(isWin),
-                                              stats.currentLevel,
-                                              stats.examplesSolved,
-                                              stats.examplesFailed,
-                                              stats.runnedMeters,
-                                              stats.collectedCoins,
-                                              stats.maxScore,
-                                              stats.maxDistanceToBolder
-                                              );
+                                  GetWinMsg(isWin),
+                                  stats.currentLevel,
+                                  stats.examplesSolved,
+                                  stats.examplesFailed,
+                                  stats.runnedMeters,
+                                  stats.collectedCoins,
+                                  stats.maxScore,
+                                  stats.maxDistanceToBolder
+                                  );
+            if (stats.DistanceToBolder < 20f)
+            {
+
+                yield return new WaitUntil(() =>
+                {
+                    return stats.DistanceToBolder < -4.5f;
+                });
+            }
+            _EndGameUI.SetActive(true);
             Debug.Log($"Твои примеры за этот уровень ({stats.currentLevel}) \n{string.Join(";\n", stats.examples)}");
+
+            TakeScreen();
         }
 
         private string GetWinMsg(bool isWin)

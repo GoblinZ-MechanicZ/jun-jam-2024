@@ -10,7 +10,7 @@ namespace GoblinzMechanics.Utils
         [SerializeField] private float _maxSize;
         [SerializeField] private float _morphSpeed;
         private TMP_Text _label;
-        private float _fontSize => _label.fontSize;
+        private float FontSize => _label.fontSize;
         private float _startSize;
         private bool fwdAnimation = true;
 
@@ -30,15 +30,20 @@ namespace GoblinzMechanics.Utils
             if (fwdAnimation)
             {
                 _label.fontSize += _morphSpeed * Time.deltaTime;
+                if (FontSize >= _maxSize)
+                {
+                    _label.fontSize = _maxSize;
+                    fwdAnimation = false;
+                }
             }
             else
             {
                 _label.fontSize -= _morphSpeed * Time.deltaTime;
-            }
-
-            if (_fontSize <= _startSize || _fontSize >= _maxSize)
-            {
-                fwdAnimation = !fwdAnimation;
+                if (FontSize <= _startSize)
+                {
+                    _label.fontSize = _startSize;
+                    fwdAnimation = true;
+                }
             }
         }
     }

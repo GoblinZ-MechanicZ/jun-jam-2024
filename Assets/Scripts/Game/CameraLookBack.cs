@@ -1,6 +1,5 @@
 namespace GoblinzMechanics.Game
 {
-    using System.Collections;
     using UnityEngine;
     using UnityEngine.InputSystem;
 
@@ -13,6 +12,8 @@ namespace GoblinzMechanics.Game
 
         private void OnEnable() {
             inputActions["LookBack"].started += StartLoockBack;
+            lookBack = true;
+            LookBack();
         }
         
         private void OnDisable() {

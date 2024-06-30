@@ -1,6 +1,5 @@
 namespace GoblinzMechanics.Game
 {
-    using System.Runtime.CompilerServices;
     using UnityEngine;
     using UnityEngine.InputSystem;
 
