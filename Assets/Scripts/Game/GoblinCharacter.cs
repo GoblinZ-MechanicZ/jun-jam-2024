@@ -85,7 +85,7 @@ namespace GoblinzMechanics.Game
 
         public void Jump(Vector3 force)
         {
-            if (_isJumping) return;
+            if (_isJumping || _onRocket) return;
             if (GoblinGameManager.Instance.GameState != GoblinGameManager.GameStateEnum.Playing) return;
             _characterAnimator.SetBool("Jumping", true);
 
@@ -180,18 +180,22 @@ namespace GoblinzMechanics.Game
         }
 
 
-        private void HandleRocketStart()
+        public void HandleRocketStart()
         {
-            _rocket.SetActive(_body.isKinematic = _onRocket = true);
+            _rocket.SetActive(_onRocket = true);
+            _body.useGravity = false;
             _characterAnimator.SetBool("Rocket", _onRocket);
-            transform.position.Set(transform.position.x, 1.6f, transform.position.z);
+            transform.position = new Vector3(transform.position.x, 1.6f, transform.position.z);
+            RouteController.Instance.routeSpeedModificator += 0.6f;
         }
 
-        private void HandleRocketEnd()
+        public void HandleRocketEnd()
         {
-            _rocket.SetActive(_body.isKinematic = _onRocket = false);
+            _rocket.SetActive(_onRocket = false);
+            _body.useGravity = true;
             _characterAnimator.SetBool("Rocket", _onRocket);
 
+            RouteController.Instance.routeSpeedModificator -= 0.6f;
         }
 
         public void LookSwitch()

@@ -11,6 +11,8 @@ namespace GoblinzMechanics.Game
     using UnityEngine.SceneManagement;
     using System.Collections;
     using System.IO;
+    using System.Collections.Generic;
+    using System.Linq;
 
     public class GoblinGameManager : Singleton<GoblinGameManager>
     {
@@ -60,7 +62,7 @@ namespace GoblinzMechanics.Game
         private bool _isWin = false;
         private Color _baseColor;
 
-        private RouteBonus _bonus;
+        [SerializeField] private List<RouteBonus> _bonus = new();
 
         public GoblinGameStats Stats => GoblinGameStats.Instance;
         public CameraSettings CameraSettingsVar;
@@ -108,7 +110,8 @@ namespace GoblinzMechanics.Game
             }
         }
 
-        private void Start() {
+        private void Start()
+        {
             _collectSource.PlayOneShot(_anyKeyClip);
         }
 
@@ -116,7 +119,7 @@ namespace GoblinzMechanics.Game
         {
             ShowStartUI();
 
-            _bonus = null;
+            _bonus.Clear();
 
             if (!_playerControls.enabled)
             {
@@ -124,6 +127,7 @@ namespace GoblinzMechanics.Game
             }
             _playerControls["PressAnyKey"].started += OnAnyKey;
             _playerControls["Pause"].started += OnPauseGame;
+            StartCoroutine(ClearNullBonuses());
         }
 
         private void OnDisable()
@@ -144,7 +148,20 @@ namespace GoblinzMechanics.Game
             GoblinGameStats.Instance.GameTime += Time.deltaTime;
             _scoreText.text = $"{Stats.Score}"; //\n{(int)(RouteController.Instance.routeCounter % (12 * RouteController.Instance.routeSpeedModificator))}
             if (GameState != GameStateEnum.Playing) { return; }
-            _bonus?.UpdateBonus();
+            for (int i = _bonus.Count - 1; i >= 0; i--)
+            {
+                if (_bonus[i] != null && _bonus[i].time >= _bonus[i].duration)
+                {
+                    if(_bonus[i].type == RouteBonus.RouteBonusType.Rocket) {
+                        GoblinCharacterController.Instance.HandleRocketEnd();
+                    }
+                    _bonus.RemoveAt(i);
+                }
+                else
+                {
+                    _bonus[i].time += Time.deltaTime;
+                }
+            }
             RouteController.Instance.routeSpeedModificator += routeSpeedIncrease * Time.deltaTime;
             Stats.runnedMeters = -Mathf.RoundToInt(_pathRoot.position.z);
         }
@@ -230,7 +247,7 @@ namespace GoblinzMechanics.Game
 #if UNITY_EDITOR
             path = $"Screenshots/Screenshot-{DateTime.Now:dd-MM-yy--HH-mm-ss}.png";
 #else
-            path = $"{Application.dataPath}/Screenshots/Screenshot-{DateTime.Now:dd-MM-yy--HH-mm-ss}.png";
+            path = $"{Application.persistentDataPath}/Screenshots/Screenshot-{DateTime.Now:dd-MM-yy--HH-mm-ss}.png";
 #endif
             directoryPath = Path.GetDirectoryName(path);
             if (!Directory.Exists(Path.GetDirectoryName(directoryPath)))
@@ -256,7 +273,20 @@ namespace GoblinzMechanics.Game
             GameState = GameStateEnum.Ended;
         }
 
-        public void HandleMathStart() {
+        private IEnumerator ClearNullBonuses()
+        {
+            while (GameState != GameStateEnum.Ended)
+            {
+                for (int i = _bonus.Count - 1; i >= 0; i--)
+                {
+                    if (_bonus[i] == null) { _bonus.RemoveAt(i); }
+                }
+                yield return new WaitForSeconds(10f);
+            }
+        }
+
+        public void HandleMathStart()
+        {
             _collectBonusSource.PlayOneShot(_exampleClip);
         }
 
@@ -266,7 +296,7 @@ namespace GoblinzMechanics.Game
             {
                 Debug.Log($"Получен {(trigger.isValid ? "" : "не")}верный ответ: {trigger.value}; пример: {example.variableA} {example.sign} {example.variableB} = {example.variableR}");
                 __prevExample = example;
-                if (_bonus != null && _bonus.type == RouteBonus.RouteBonusType.Sicentist)
+                if (_bonus.Count > 0 && _bonus.Find((b) => b.type == RouteBonus.RouteBonusType.Sicentist) != null)
                 {
                     Stats.examples.Add($"Example: {example.GetExampleString()} : Answered correct because bonus: {trigger.value}");
                     _vignette.intensity.value = 1f;
@@ -310,7 +340,7 @@ namespace GoblinzMechanics.Game
         public void HandleCoin(int value)
         {
             Debug.Log($"Ха-ха! Очередная монетка падет в мои карманцы!");
-            if (_bonus != null && _bonus.type == RouteBonus.RouteBonusType.Mult2)
+            if (_bonus != null && _bonus.Find((b) => b.type == RouteBonus.RouteBonusType.Mult2) != null)
             {
                 value *= 2;
             }
@@ -376,7 +406,7 @@ namespace GoblinzMechanics.Game
 
         public void HandleBonus(RouteBonus bonus)
         {
-            _bonus = bonus;
+            _bonus.Add(bonus);
             _collectBonusSource.PlayOneShot(bonus.bonusClip);
             Debug.Log($"Bonus collected {bonus.type}");
         }

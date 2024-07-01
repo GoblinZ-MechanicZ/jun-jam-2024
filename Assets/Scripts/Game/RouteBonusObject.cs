@@ -30,19 +30,4 @@ namespace GoblinzMechanics.Game
         public RouteBonusType type;
         public float time = 0;
     }
-
-    public static class RouteBonusExtentions {
-        public static RouteBonus UpdateBonus(this RouteBonus bonus)
-        {
-            bonus.time += Time.deltaTime;
-            if (bonus.time >= bonus.duration)
-            {
-                return null;
-            }
-            else
-            {
-                return bonus;
-            }
-        }
-    }
 }

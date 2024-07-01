@@ -443,7 +443,7 @@ MonoBehaviour:
     invertFade: 0
     distanceFadeStart: 100000
     distanceFadeEnd: 100000
-    textureOffset: {x: 0, y: 0, z: 0}
+    textureOffset: {x: -0, y: -0, z: -0}
     falloffMode: 0
     maskMode: 0
     materialMask: {fileID: 0}
@@ -8032,7 +8032,7 @@ MonoBehaviour:
     invertFade: 0
     distanceFadeStart: 100000
     distanceFadeEnd: 100000
-    textureOffset: {x: 0, y: 0, z: 0}
+    textureOffset: {x: -0, y: -0, z: -0}
     falloffMode: 0
     maskMode: 0
     materialMask: {fileID: 0}
@@ -8791,11 +8791,11 @@ MonoBehaviour:
     type: 1
     time: 0
   - bonusClip: {fileID: 8300000, guid: 79726636724bc364da905bfc999f04fc, type: 3}
-    duration: 30
+    duration: 15
     type: 0
     time: 0
   - bonusClip: {fileID: 8300000, guid: 2b58aab80afd72a47986ef7c5ac52742, type: 3}
-    duration: 30
+    duration: 15
     type: 2
     time: 0
 --- !u!1001 &1244602053
@@ -10686,6 +10686,7 @@ MonoBehaviour:
     \u0441\u0447\u0435\u0442<color=red>:</color> <cSpace=10>{5}</cSpace>\r\n<cSpace=10>[<color=red>Max</color>]</cSpace>
     \u0434\u0438\u0441\u0442\u0430\u043D\u0446\u0438\u044F \u043E\u0442 \u0432\u0430\u043B\u0443\u043D\u0430<color=red>:</color>
     <cSpace=10>{6:0.00}</cSpace> \u043C"
+  _bonus: []
   CameraSettingsVar: {fileID: 11400000, guid: 5a5a169eeed31384bbe2cf64a35d8bf9, type: 2}
   OnAnyKeyPressed:
     m_PersistentCalls:
@@ -11657,7 +11658,7 @@ AudioSource:
   Priority: 128
   DopplerLevel: 1
   MinDistance: 0.1
-  MaxDistance: 15
+  MaxDistance: 6
   Pan2D: 0
   rolloffMode: 0
   BypassEffects: 0
@@ -12359,7 +12360,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!222 &712769036374171276
 CanvasRenderer:
   m_ObjectHideFlags: 0

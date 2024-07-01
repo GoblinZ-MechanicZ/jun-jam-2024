@@ -63,7 +63,8 @@ namespace GoblinzMechanics.Game
         public RouteBonus GetRandomRouteBonus() {
             if (_bonusList.Count > 0)
             {
-                return _bonusList[Random.Range(0, _bonusList.Count)];
+                var tmp = _bonusList[Random.Range(0, _bonusList.Count)];
+                return new RouteBonus() { bonusClip = tmp.bonusClip, duration = tmp.duration, time = 0, type = tmp.type } ;
             } else {
                 return null;
             }
@@ -126,6 +127,10 @@ namespace GoblinzMechanics.Game
             {
                 _character.Crouch(context.action.phase);
             }
+        }
+
+        public void HandleRocketEnd() {
+            _character.HandleRocketEnd();
         }
     }
 }
