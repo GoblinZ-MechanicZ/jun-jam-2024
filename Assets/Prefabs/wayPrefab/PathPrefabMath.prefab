@@ -930,7 +930,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   routeChance: 100
-  id: 0
+  id: 898
   length: 6
   isRotate: 0
   _caveModule: {fileID: 352920880622940869}
@@ -2536,6 +2536,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2942405131662888457, guid: 930a3706d6b25db41b52ec6431a66481,
+        type: 3}
+      propertyPath: id
+      value: 898
       objectReference: {fileID: 0}
     - target: {fileID: 2942405131662888457, guid: 930a3706d6b25db41b52ec6431a66481,
         type: 3}

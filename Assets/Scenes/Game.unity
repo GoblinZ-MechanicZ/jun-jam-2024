@@ -163,7 +163,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _autoExpandPool: 0
-  _startLength: 6
+  _startLength: 12
   _routeShowLength: 22
   _routeFloorThickness: 0.2
   _routeSpeed: 10
@@ -1926,6 +1926,7 @@ MonoBehaviour:
   _dieNormalZ: -0.8
   _dieNormalY: 0.5
   _characterAnimator: {fileID: 1914835396}
+  _rocket: {fileID: 1276819057}
   bonus:
     bonusClip: {fileID: 0}
     duration: 0
@@ -8804,6 +8805,12 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 51f22098fe87a3740acab0334f0a8350, type: 3}
+--- !u!1 &1276819057 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4261954160735571100, guid: c8f30f2bcacad674cb99bddca111d891,
+    type: 3}
+  m_PrefabInstance: {fileID: 638785898}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1296495045 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2916570863362053800, guid: 50df86bb129e1214d9cd5c7840df71d1,

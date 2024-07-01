@@ -10,11 +10,13 @@ namespace GoblinzMechanics.Game
         [SerializeField] private float _dieNormalZ = -0.8f;
         [SerializeField] private float _dieNormalY = 0.5f;
         [SerializeField] private Animator _characterAnimator;
+        [SerializeField] private GameObject _rocket;
         private Vector3 _oldLinVelocity, _oldAngVelocity;
 
         private float _inTriggerTime = 0f;
         private bool _inTrigger = false;
         private bool _isJumping = false;
+        private bool _onRocket = false;
 
         public bool IsGrounded => _inTriggerTime >= _floorCheckTime;
         public RouteBonus bonus;
@@ -36,7 +38,8 @@ namespace GoblinzMechanics.Game
                     _body.isKinematic = false;
                     _body.linearVelocity = _oldLinVelocity;
                     _body.angularVelocity = _oldAngVelocity;
-                    _characterAnimator.SetBool("Win", (newState != GoblinGameManager.GameStateEnum.Playing));
+                    _characterAnimator.SetBool("Win", GoblinGameManager.Instance.IsWin);
+                    _rocket.SetActive(_onRocket = false);
                 }
             };
         }
@@ -167,9 +170,28 @@ namespace GoblinzMechanics.Game
             if (other.TryGetComponent<RouteBonusObject>(out var b))
             {
                 bonus = GoblinCharacterController.Instance.GetRandomRouteBonus();
+                if (bonus.type == RouteBonus.RouteBonusType.Rocket)
+                {
+                    HandleRocketStart();
+                }
                 GoblinGameManager.Instance.HandleBonus(bonus);
                 b.DestroyBonus();
             }
+        }
+
+
+        private void HandleRocketStart()
+        {
+            _rocket.SetActive(_body.isKinematic = _onRocket = true);
+            _characterAnimator.SetBool("Rocket", _onRocket);
+            transform.position.Set(transform.position.x, 1.6f, transform.position.z);
+        }
+
+        private void HandleRocketEnd()
+        {
+            _rocket.SetActive(_body.isKinematic = _onRocket = false);
+            _characterAnimator.SetBool("Rocket", _onRocket);
+
         }
 
         public void LookSwitch()
