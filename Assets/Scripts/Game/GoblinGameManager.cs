@@ -31,18 +31,39 @@ namespace GoblinzMechanics.Game
         [SerializeField] private GameObject _prepareUI;
         [SerializeField] private GameObject _EndGameUI;
         [SerializeField] private Transform _pathRoot;
-        [SerializeField] private InputActionAsset playerControls;
+        [SerializeField] private InputActionAsset _playerControls;
         [SerializeField] private VolumeProfile _globalProfile;
 
-        private Color _baseColor;
         [SerializeField] private Color _wrongColor;
         [SerializeField] private Color _rightColor;
         [SerializeField] private float _vignetteDecreaseSpeed = 0.25f;
-        [SerializeField] private CameraLookBack cameraLookBack;
-        private Vignette _vignette;
-        public GoblinGameStats stats => GoblinGameStats.Instance;
-        public CameraSettings CameraSettingsVar;
+        [SerializeField] private CameraLookBack _cameraLookBack;
+        [SerializeField] private AudioSource _collectSource;
+        [SerializeField] private AudioSource _collectBonusSource;
+        [SerializeField] private AudioClip _collectCoin;
+        [SerializeField] private AudioClip _winClip;
+        [SerializeField] private AudioClip _loseClip;
+        [SerializeField] private AudioClip _loseBolderClip;
+        [SerializeField] private AudioClip _exampleClip;
+        [SerializeField] private AudioClip _wrongAnswer;
+        [SerializeField] private AudioClip _rightAnswer;
+        [SerializeField] private AudioClip _anyKeyClip;
 
+        [Space]
+        [Multiline]
+        [SerializeField] private string _endGameTextFormat = " <color=red>Ы</color>ЫЫыть!\n<color=red>У</color>ровень<color=red>:</color> {0}\n<color=red>Т</color>воя <color=red>Z</color>тата<color=red>:</color>\n<color=red>П</color>римеры правильно<color=red>:</color> {1}\n<color=red>П</color>римеры неправильно<color=red>:</color> {2}\n<color=red>П</color>робежал<color=red>:</color> {3:0.00} м\n<color=red>Z</color>тырил монет<color=red>:</color> {4}\n<cSpace=10>[<color=red>Max</color>]</cSpace> счет<color=red>:</color> {5}\n<cSpace=10>[<color=red>Max</color>]</cSpace> дистанция от валуна<color=red>:</color> {6:0.00} м";
+        [Space]
+
+        [Space]
+        private MathRouteSubClass __prevExample;
+        private Vignette _vignette;
+        private bool _isWin = false;
+        private Color _baseColor;
+
+        private RouteBonus _bonus;
+
+        public GoblinGameStats Stats => GoblinGameStats.Instance;
+        public CameraSettings CameraSettingsVar;
 
         public GameStateEnum GameState
         {
@@ -66,8 +87,6 @@ namespace GoblinzMechanics.Game
         public UnityEvent OnWin;
         public UnityEvent OnDeath;
 
-        private bool _isWin = false;
-
         private void OnDestroy()
         {
             CameraSettingsVar.Enabled = false;
@@ -83,22 +102,28 @@ namespace GoblinzMechanics.Game
                 _baseColor = _vignette.color.value;
             }
 
-            if (!playerControls.enabled)
+            if (!_playerControls.enabled)
             {
-                playerControls.Enable();
+                _playerControls.Enable();
             }
+        }
+
+        private void Start() {
+            _collectSource.PlayOneShot(_anyKeyClip);
         }
 
         private void OnEnable()
         {
             ShowStartUI();
 
-            if (!playerControls.enabled)
+            _bonus = null;
+
+            if (!_playerControls.enabled)
             {
-                playerControls.Enable();
+                _playerControls.Enable();
             }
-            playerControls["PressAnyKey"].started += OnAnyKey;
-            playerControls["Pause"].started += OnPauseGame;
+            _playerControls["PressAnyKey"].started += OnAnyKey;
+            _playerControls["Pause"].started += OnPauseGame;
         }
 
         private void OnDisable()
@@ -109,17 +134,19 @@ namespace GoblinzMechanics.Game
             {
                 _scoreText.gameObject.SetActive(false);
             }
-            playerControls["PressAnyKey"].started -= OnAnyKey;
-            playerControls["Pause"].started -= OnPauseGame;
+            _playerControls["PressAnyKey"].started -= OnAnyKey;
+            _playerControls["Pause"].started -= OnPauseGame;
         }
 
         private void Update()
         {
             HandleVignette();
-            _scoreText.text = $"{stats.Score}"; //\n{(int)(RouteController.Instance.routeCounter % (12 * RouteController.Instance.routeSpeedModificator))}
+            GoblinGameStats.Instance.GameTime += Time.deltaTime;
+            _scoreText.text = $"{Stats.Score}"; //\n{(int)(RouteController.Instance.routeCounter % (12 * RouteController.Instance.routeSpeedModificator))}
             if (GameState != GameStateEnum.Playing) { return; }
+            _bonus?.UpdateBonus();
             RouteController.Instance.routeSpeedModificator += routeSpeedIncrease * Time.deltaTime;
-            stats.runnedMeters = -Mathf.RoundToInt(_pathRoot.position.z);
+            Stats.runnedMeters = -Mathf.RoundToInt(_pathRoot.position.z);
         }
 
         private void ShowStartUI()
@@ -130,10 +157,6 @@ namespace GoblinzMechanics.Game
             _prepareUI.SetActive(true);
         }
 
-        private IEnumerator DoShowStartUI() {
-            yield return GoblinComicsManager.Instance.StartGamePlay();
-        }
-
         private void OnAnyKey(InputAction.CallbackContext context)
         {
             OnAnyKeyPressed?.Invoke();
@@ -141,7 +164,7 @@ namespace GoblinzMechanics.Game
 
         private void OnPauseGame(InputAction.CallbackContext context)
         {
-            if (GameState != GameStateEnum.Playing && GameState != GameStateEnum.Pause) { return; }
+            if (Stats.GameTime > 2 && GameState != GameStateEnum.Playing && GameState != GameStateEnum.Pause) { return; }
             PauseGame();
             OnPausePressed?.Invoke(GameState == GameStateEnum.Pause);
 
@@ -161,7 +184,7 @@ namespace GoblinzMechanics.Game
         private IEnumerator LookBack()
         {
             yield return new WaitForSeconds(1f);
-            cameraLookBack.LookNormal();
+            _cameraLookBack.LookNormal();
             GoblinCharacterController.Instance.LookNormal();
         }
 
@@ -171,13 +194,13 @@ namespace GoblinzMechanics.Game
             {
                 GameState = GameStateEnum.Pause;
                 _statsText.text = string.Format(_endGameTextFormat,
-                                                stats.currentLevel,
-                                                stats.examplesSolved,
-                                                stats.examplesFailed,
-                                                stats.runnedMeters,
-                                                stats.collectedCoins,
-                                                stats.maxScore,
-                                                stats.maxDistanceToBolder
+                                                Stats.currentLevel,
+                                                Stats.examplesSolved,
+                                                Stats.examplesFailed,
+                                                Stats.runnedMeters,
+                                                Stats.collectedCoins,
+                                                Stats.maxScore,
+                                                Stats.maxDistanceToBolder
                                                 );
             }
             else if (GameState == GameStateEnum.Pause)
@@ -189,14 +212,14 @@ namespace GoblinzMechanics.Game
         public void RestartGame()
         {
             _EndGameUI.SetActive(false);
-            stats.Reset();
+            Stats.Reset();
             if (_isWin)
             {
-                stats.currentLevel++;
+                Stats.currentLevel++;
             }
             else
             {
-                stats.currentLevel = 1;
+                Stats.currentLevel = 1;
             }
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
@@ -233,33 +256,53 @@ namespace GoblinzMechanics.Game
             GameState = GameStateEnum.Ended;
         }
 
-        private MathRouteSubClass __prevExample;
+        public void HandleMathStart() {
+            _collectBonusSource.PlayOneShot(_exampleClip);
+        }
+
         public void HandleMathAnswer(MathAnswerTrigger trigger, MathRouteSubClass example)
         {
             if (__prevExample != example)
             {
                 Debug.Log($"Получен {(trigger.isValid ? "" : "не")}верный ответ: {trigger.value}; пример: {example.variableA} {example.sign} {example.variableB} = {example.variableR}");
                 __prevExample = example;
-                stats.examples.Add($"Example: {example.GetExampleString()} : Answered: {trigger.value}");
-                if (trigger.isValid)
+                if (_bonus != null && _bonus.type == RouteBonus.RouteBonusType.Sicentist)
                 {
+                    Stats.examples.Add($"Example: {example.GetExampleString()} : Answered correct because bonus: {trigger.value}");
                     _vignette.intensity.value = 1f;
                     _vignette.color.value = _rightColor;
 
-                    stats.examplesSolved++;
-                    stats.Score += stats.scoreAdd;
+                    Stats.examplesSolved++;
+                    Stats.Score += Stats.scoreAdd;
 
                     RouteController.Instance.routeSpeedModificator += 0.02f;
+                    _collectBonusSource.PlayOneShot(_rightAnswer);
                 }
                 else
                 {
-                    _vignette.intensity.value = 1f;
-                    _vignette.color.value = _wrongColor;
+                    Stats.examples.Add($"Example: {example.GetExampleString()} : Answered {(trigger.isValid ? "correct" : "incorrect")} : {trigger.value}");
+                    if (trigger.isValid)
+                    {
+                        _vignette.intensity.value = 1f;
+                        _vignette.color.value = _rightColor;
 
-                    stats.examplesFailed++;
-                    stats.Score -= stats.scoreAdd;
+                        Stats.examplesSolved++;
+                        Stats.Score += Stats.scoreAdd;
 
-                    RouteController.Instance.routeSpeedModificator -= 0.2f;
+                        RouteController.Instance.routeSpeedModificator += 0.02f;
+                        _collectBonusSource.PlayOneShot(_rightAnswer);
+                    }
+                    else
+                    {
+                        _vignette.intensity.value = 1f;
+                        _vignette.color.value = _wrongColor;
+
+                        Stats.examplesFailed++;
+                        Stats.Score -= Stats.scoreAdd;
+
+                        RouteController.Instance.routeSpeedModificator -= 0.2f;
+                        _collectBonusSource.PlayOneShot(_wrongAnswer);
+                    }
                 }
             }
         }
@@ -267,8 +310,13 @@ namespace GoblinzMechanics.Game
         public void HandleCoin(int value)
         {
             Debug.Log($"Ха-ха! Очередная монетка падет в мои карманцы!");
-            stats.collectedCoins += value;
-            stats.Score += value;
+            if (_bonus != null && _bonus.type == RouteBonus.RouteBonusType.Mult2)
+            {
+                value *= 2;
+            }
+            Stats.collectedCoins += value;
+            Stats.Score += value;
+            _collectSource.PlayOneShot(_collectCoin);
         }
 
         public void HandleVignette()
@@ -280,12 +328,11 @@ namespace GoblinzMechanics.Game
             }
         }
 
-        [Multiline]
-        [SerializeField] private string _endGameTextFormat = " <color=red>Ы</color>ЫЫыть!\n<color=red>У</color>ровень<color=red>:</color> {0}\n<color=red>Т</color>воя <color=red>Z</color>тата<color=red>:</color>\n<color=red>П</color>римеры правильно<color=red>:</color> {1}\n<color=red>П</color>римеры неправильно<color=red>:</color> {2}\n<color=red>П</color>робежал<color=red>:</color> {3:0.00} м\n<color=red>Z</color>тырил монет<color=red>:</color> {4}\n<cSpace=10>[<color=red>Max</color>]</cSpace> счет<color=red>:</color> {5}\n<cSpace=10>[<color=red>Max</color>]</cSpace> дистанция от валуна<color=red>:</color> {6:0.00} м";
         private void ShowEndUI()
         {
             StartCoroutine(PlayShowEndUI());
         }
+
         private IEnumerator PlayShowEndUI()
         {
             if (_scoreText != null)
@@ -293,26 +340,45 @@ namespace GoblinzMechanics.Game
                 _scoreText.gameObject.SetActive(false);
             }
             _endGameText.text = string.Format(_endGameTextFormat,
-                                              stats.currentLevel,
-                                              stats.examplesSolved,
-                                              stats.examplesFailed,
-                                              stats.runnedMeters,
-                                              stats.collectedCoins,
-                                              stats.maxScore,
-                                              stats.maxDistanceToBolder
+                                              Stats.currentLevel,
+                                              Stats.examplesSolved,
+                                              Stats.examplesFailed,
+                                              Stats.runnedMeters,
+                                              Stats.collectedCoins,
+                                              Stats.maxScore,
+                                              Stats.maxDistanceToBolder
                                               );
-            if (stats.DistanceToBolder < 20f)
+            if (!_isWin)
             {
-
-                yield return new WaitUntil(() =>
+                if (Stats.DistanceToBolder < 20f)
                 {
-                    return stats.DistanceToBolder < -4.5f;
-                });
+
+                    yield return new WaitUntil(() =>
+                    {
+                        return Stats.DistanceToBolder < -4.5f;
+                    });
+                    _collectBonusSource.PlayOneShot(_loseBolderClip);
+                }
+                else
+                {
+                    _collectBonusSource.PlayOneShot(_loseClip);
+                }
+            }
+            else
+            {
+                _collectBonusSource.PlayOneShot(_winClip);
             }
             _EndGameUI.SetActive(true);
-            Debug.Log($"Твои примеры за этот уровень ({stats.currentLevel}) \n{string.Join(";\n", stats.examples)}");
+            Debug.Log($"Твои примеры за этот уровень ({Stats.currentLevel}) \n{string.Join(";\n", Stats.examples)}");
 
             TakeScreen();
+        }
+
+        public void HandleBonus(RouteBonus bonus)
+        {
+            _bonus = bonus;
+            _collectBonusSource.PlayOneShot(bonus.bonusClip);
+            Debug.Log($"Bonus collected {bonus.type}");
         }
     }
 }

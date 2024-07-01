@@ -36,7 +36,7 @@ namespace GoblinzMechanics.Game
 
         private void StartLoockBack(InputAction.CallbackContext context)
         {
-            if (GoblinGameManager.Instance.GameState != GoblinGameManager.GameStateEnum.Playing) { return; }
+            if (GoblinGameManager.Instance.GameState != GoblinGameManager.GameStateEnum.Playing || GoblinGameStats.Instance.GameTime < 2f) { return; }
             if (lookBack)
             {
                 LookNormalAnim();

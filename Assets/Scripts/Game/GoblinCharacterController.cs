@@ -1,5 +1,6 @@
 namespace GoblinzMechanics.Game
 {
+    using System.Collections.Generic;
     using GoblinzMechanics.Utils;
     using UnityEngine;
     using UnityEngine.InputSystem;
@@ -12,9 +13,12 @@ namespace GoblinzMechanics.Game
         [SerializeField] private float _characterJumpForce = 5f;
 
         [SerializeField] private InputActionAsset _playerControls;
-        private string _moveActionName = "Move";
-        private string _jumpActionName = "Jump";
-        private string _crouchActionName = "Crouch";
+        [Space]
+        [SerializeField] private List<RouteBonus> _bonusList = new();
+        
+        private readonly string _moveActionName = "Move";
+        private readonly string _jumpActionName = "Jump";
+        private readonly string _crouchActionName = "Crouch";
 
         private float _movementInput;
 
@@ -54,6 +58,15 @@ namespace GoblinzMechanics.Game
             _playerControls[_crouchActionName].canceled -= OnCrouch;
 
             _playerControls["LookBack"].started -= StartLoockBack;
+        }
+
+        public RouteBonus GetRandomRouteBonus() {
+            if (_bonusList.Count > 0)
+            {
+                return _bonusList[Random.Range(0, _bonusList.Count)];
+            } else {
+                return null;
+            }
         }
 
         private void FixedUpdate()

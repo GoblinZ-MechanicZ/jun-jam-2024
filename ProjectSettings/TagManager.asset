@@ -9,6 +9,7 @@ TagManager:
   - bonus
   - mathAnswer
   - coin
+  - mathStart
   layers:
   - Default
   - TransparentFX

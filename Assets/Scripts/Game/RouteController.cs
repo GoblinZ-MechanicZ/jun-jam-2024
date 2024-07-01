@@ -97,7 +97,7 @@ namespace GoblinzMechanics.Game
         private void AddFirst()
         {
             RouteObject routeObject = TakeFromPool(_routeObjectPrefabs[0]);
-            routeObject.transform.SetPositionAndRotation(Vector3.zero - Vector3.up * _routeFloorThickness + Vector3.back * routeObject.length, Quaternion.identity);
+            routeObject.transform.SetPositionAndRotation(Vector3.zero - Vector3.up * _routeFloorThickness + 5f * routeObject.length * Vector3.back, Quaternion.identity);
             _routeObjects.Add(routeObject);
         }
 
@@ -115,7 +115,7 @@ namespace GoblinzMechanics.Game
                     routeObject = TakeFromPool(GetByChance());
                 }
                 _prevRouteObject = _routeObjects[^1];
-                routeObject.Init(!_prevRouteObject.isRotate);
+                routeObject.Init(Random.Range(0, 101) >= 50);
                 routeObject.transform.SetPositionAndRotation(_prevRouteObject.transform.position + Vector3.forward * _prevRouteObject.length, Quaternion.identity);
                 _routeObjects.Add(routeObject);
             }

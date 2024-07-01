@@ -10,6 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 206028992124017674}
   - component: {fileID: 6769248372747417384}
+  - component: {fileID: 4924529290703897850}
+  - component: {fileID: 3691291397819703569}
   m_Layer: 0
   m_Name: OST
   m_TagString: Untagged
@@ -130,3 +132,29 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &4924529290703897850
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2347698569394191756}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8320f31607b8f1540b43cd4b1a0285d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &3691291397819703569
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2347698569394191756}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0cffb32003e01234db57ebbf3de00b16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _source: {fileID: 6769248372747417384}
+  _prevValue: 0

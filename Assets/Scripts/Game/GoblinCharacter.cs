@@ -10,14 +10,15 @@ namespace GoblinzMechanics.Game
         [SerializeField] private float _dieNormalZ = -0.8f;
         [SerializeField] private float _dieNormalY = 0.5f;
         [SerializeField] private Animator _characterAnimator;
+        private Vector3 _oldLinVelocity, _oldAngVelocity;
 
         private float _inTriggerTime = 0f;
         private bool _inTrigger = false;
         private bool _isJumping = false;
 
         public bool IsGrounded => _inTriggerTime >= _floorCheckTime;
+        public RouteBonus bonus;
 
-        private Vector3 _oldLinVelocity, _oldAngVelocity;
         private void OnEnable()
         {
             GoblinGameManager.Instance.OnStateChanged += (newState) =>
@@ -59,6 +60,8 @@ namespace GoblinzMechanics.Game
             HandleJumpTriggerEnter(other);
             HandleMathAnswer(other);
             HandleCoin(other);
+            HandleBonus(other);
+            HandleMathStart(other);
         }
 
         private void OnTriggerExit(Collider other)
@@ -125,6 +128,12 @@ namespace GoblinzMechanics.Game
             _inTrigger = false;
         }
 
+        private void HandleMathStart(Collider other)
+        {
+            if (!other.CompareTag("mathStart")) return;
+            GoblinGameManager.Instance.HandleMathStart();
+        }
+
         private void HandleMathAnswer(Collider other)
         {
             if (!other.CompareTag("mathAnswer")) return;
@@ -151,10 +160,21 @@ namespace GoblinzMechanics.Game
             }
         }
 
+        private void HandleBonus(Collider other)
+        {
+            if (!other.CompareTag("bonus")) return;
+
+            if (other.TryGetComponent<RouteBonusObject>(out var b))
+            {
+                bonus = GoblinCharacterController.Instance.GetRandomRouteBonus();
+                GoblinGameManager.Instance.HandleBonus(bonus);
+                b.DestroyBonus();
+            }
+        }
+
         public void LookSwitch()
         {
-            if (_isJumping) return;
-            if (GoblinGameManager.Instance.GameState != GoblinGameManager.GameStateEnum.Playing) return;
+            if (_isJumping) return; if (GoblinGameManager.Instance.GameState != GoblinGameManager.GameStateEnum.Playing || GoblinGameStats.Instance.GameTime < 2f) { return; }
             _characterAnimator.SetBool("LookBack", !_characterAnimator.GetBool("LookBack"));
         }
 

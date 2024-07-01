@@ -420,7 +420,7 @@ MonoBehaviour:
   value: 1
   _particle: {fileID: 5126204343424912775}
   _meshRenderer: {fileID: 2364117177287482676}
-  coinCollider: {fileID: 6719368747794588781}
+  _coinCollider: {fileID: 6719368747794588781}
 --- !u!198 &5126204343424912775
 ParticleSystem:
   m_ObjectHideFlags: 0
