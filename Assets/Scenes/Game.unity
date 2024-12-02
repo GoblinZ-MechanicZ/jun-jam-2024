@@ -9035,6 +9035,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1213124284}
   - component: {fileID: 1213124285}
+  - component: {fileID: 1213124286}
   m_Layer: 0
   m_Name: CharacterControler
   m_TagString: Untagged
@@ -9075,6 +9076,8 @@ MonoBehaviour:
   _characterJumpForce: 6
   _playerControls: {fileID: -944628639613478452, guid: 45e134c6b37de0842abeff3901148cf1,
     type: 3}
+  _mobileInputs: {fileID: 1213124286}
+  _isMobile: 1
   _bonusList:
   - bonusClip: {fileID: 8300000, guid: 33f6e0e9952d35847af225841b67b6c0, type: 3}
     duration: 10
@@ -9088,6 +9091,19 @@ MonoBehaviour:
     duration: 15
     type: 2
     time: 0
+--- !u!114 &1213124286
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1213124283}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f518a2a3acafd8648996c8afeaed8b5e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  longTapTime: 0.5
 --- !u!1001 &1244602053
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -10977,6 +10993,8 @@ MonoBehaviour:
     \u0434\u0438\u0441\u0442\u0430\u043D\u0446\u0438\u044F \u043E\u0442 \u0432\u0430\u043B\u0443\u043D\u0430<color=red>:</color>
     <cSpace=10>{6:0.00}</cSpace> \u043C"
   _bonus: []
+  _mobileInputs: {fileID: 1213124286}
+  _isMobile: 1
   CameraSettingsVar: {fileID: 11400000, guid: 5a5a169eeed31384bbe2cf64a35d8bf9, type: 2}
   OnAnyKeyPressed:
     m_PersistentCalls:

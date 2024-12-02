@@ -63,6 +63,8 @@ namespace GoblinzMechanics.Game
         private Color _baseColor;
 
         [SerializeField] private List<RouteBonus> _bonus = new();
+        [SerializeField] private MobileInputHandler _mobileInputs;
+        [SerializeField] private bool _isMobile;
 
         public GoblinGameStats Stats => GoblinGameStats.Instance;
         public CameraSettings CameraSettingsVar;
@@ -104,7 +106,7 @@ namespace GoblinzMechanics.Game
                 _baseColor = _vignette.color.value;
             }
 
-            if (!_playerControls.enabled)
+            if (!_isMobile && !_playerControls.enabled)
             {
                 _playerControls.Enable();
             }
@@ -120,13 +122,19 @@ namespace GoblinzMechanics.Game
             ShowStartUI();
 
             _bonus.Clear();
-
-            if (!_playerControls.enabled)
+            if (!_isMobile && !_playerControls.enabled)
             {
                 _playerControls.Enable();
             }
-            _playerControls["PressAnyKey"].started += OnAnyKey;
-            _playerControls["Pause"].started += OnPauseGame;
+            if (_isMobile)
+            {
+                _mobileInputs.OnTap += OnAnyTap;
+            }
+            else
+            {
+                _playerControls["PressAnyKey"].started += OnAnyKey;
+                _playerControls["Pause"].started += OnPauseGame;
+            }
             StartCoroutine(ClearNullBonuses());
         }
 
@@ -138,8 +146,15 @@ namespace GoblinzMechanics.Game
             {
                 _scoreText.gameObject.SetActive(false);
             }
-            _playerControls["PressAnyKey"].started -= OnAnyKey;
-            _playerControls["Pause"].started -= OnPauseGame;
+            if (_isMobile)
+            {
+                _mobileInputs.OnTap -= OnAnyTap;
+            }
+            else
+            {
+                _playerControls["PressAnyKey"].started -= OnAnyKey;
+                _playerControls["Pause"].started -= OnPauseGame;
+            }
         }
 
         private void Update()
@@ -152,7 +167,8 @@ namespace GoblinzMechanics.Game
             {
                 if (_bonus[i] != null && _bonus[i].time >= _bonus[i].duration)
                 {
-                    if(_bonus[i].type == RouteBonus.RouteBonusType.Rocket) {
+                    if (_bonus[i].type == RouteBonus.RouteBonusType.Rocket)
+                    {
                         GoblinCharacterController.Instance.HandleRocketEnd();
                     }
                     _bonus.RemoveAt(i);
@@ -176,6 +192,10 @@ namespace GoblinzMechanics.Game
 
         private void OnAnyKey(InputAction.CallbackContext context)
         {
+            OnAnyKeyPressed?.Invoke();
+        }
+
+        private void OnAnyTap() {
             OnAnyKeyPressed?.Invoke();
         }
 

@@ -104,6 +104,7 @@ namespace GoblinzMechanics.Game
         public void Crouch(InputActionPhase phase)
         {
             if (GoblinGameManager.Instance.GameState != GoblinGameManager.GameStateEnum.Playing) return;
+            // Not implemented
             switch (phase)
             {
                 case InputActionPhase.Started:
@@ -112,6 +113,11 @@ namespace GoblinzMechanics.Game
                 default:
                     break;
             }
+        }
+
+        public void Crouch() {
+            if (GoblinGameManager.Instance.GameState != GoblinGameManager.GameStateEnum.Playing) return;
+            // Not implemented
         }
 
 

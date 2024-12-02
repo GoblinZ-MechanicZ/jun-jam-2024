@@ -13,9 +13,11 @@ namespace GoblinzMechanics.Game
         [SerializeField] private float _characterJumpForce = 5f;
 
         [SerializeField] private InputActionAsset _playerControls;
+        [SerializeField] private MobileInputHandler _mobileInputs;
+        [SerializeField] private bool _isMobile = true;
         [Space]
         [SerializeField] private List<RouteBonus> _bonusList = new();
-        
+
         private readonly string _moveActionName = "Move";
         private readonly string _jumpActionName = "Jump";
         private readonly string _crouchActionName = "Crouch";
@@ -26,20 +28,31 @@ namespace GoblinzMechanics.Game
 
         private void OnEnable()
         {
-            _playerControls.Enable();
-            _playerControls[_moveActionName].started += OnMovement;
-            _playerControls[_moveActionName].performed += OnMovement;
-            _playerControls[_moveActionName].canceled += OnMovement;
+            if (_isMobile)
+            {
+                _mobileInputs.OnSwipeDown += OnSwipeDown;
+                _mobileInputs.OnSwipeLeft += OnSwipeLeft;
+                _mobileInputs.OnSwipeRight += OnSwipeRight;
+                _mobileInputs.OnSwipeUp += OnSwipeUp;
+                _mobileInputs.OnLongTap += OnLongTap;
+            }
+            else
+            {
+                _playerControls.Enable();
+                _playerControls[_moveActionName].started += OnMovement;
+                _playerControls[_moveActionName].performed += OnMovement;
+                _playerControls[_moveActionName].canceled += OnMovement;
 
-            _playerControls[_jumpActionName].started += OnJump;
-            _playerControls[_jumpActionName].performed += OnJump;
-            _playerControls[_jumpActionName].canceled += OnJump;
+                _playerControls[_jumpActionName].started += OnJump;
+                _playerControls[_jumpActionName].performed += OnJump;
+                _playerControls[_jumpActionName].canceled += OnJump;
 
-            _playerControls[_crouchActionName].started += OnCrouch;
-            _playerControls[_crouchActionName].performed += OnCrouch;
-            _playerControls[_crouchActionName].canceled += OnCrouch;
+                _playerControls[_crouchActionName].started += OnCrouch;
+                _playerControls[_crouchActionName].performed += OnCrouch;
+                _playerControls[_crouchActionName].canceled += OnCrouch;
 
-            _playerControls["LookBack"].started += StartLoockBack;
+                _playerControls["LookBack"].started += StartLoockBack;
+            }
         }
 
         private void OnDisable()
@@ -60,12 +73,15 @@ namespace GoblinzMechanics.Game
             _playerControls["LookBack"].started -= StartLoockBack;
         }
 
-        public RouteBonus GetRandomRouteBonus() {
+        public RouteBonus GetRandomRouteBonus()
+        {
             if (_bonusList.Count > 0)
             {
                 var tmp = _bonusList[Random.Range(0, _bonusList.Count)];
-                return new RouteBonus() { bonusClip = tmp.bonusClip, duration = tmp.duration, time = 0, type = tmp.type } ;
-            } else {
+                return new RouteBonus() { bonusClip = tmp.bonusClip, duration = tmp.duration, time = 0, type = tmp.type };
+            }
+            else
+            {
                 return null;
             }
         }
@@ -97,11 +113,20 @@ namespace GoblinzMechanics.Game
 
         private void HandleMovement()
         {
-            _velocity.Set(_movementInput * _characterMoveSpeed * Time.deltaTime, 0, 0);
 
-            _character.Move(new Vector3(Mathf.Clamp(_character.transform.position.x + _velocity.x, -_sideMaxDistance, _sideMaxDistance),
-                                    _character.transform.position.y,
-                                    _character.transform.position.z), _movementInput);
+            if (_isMobile)
+            {
+                _character.Move(new Vector3(_sideMaxDistance * _movementInput, _character.transform.position.y,
+                                        _character.transform.position.z), _movementInput);
+
+            }
+            else
+            {
+                _velocity.Set(_movementInput * _characterMoveSpeed * Time.deltaTime, 0, 0);
+                _character.Move(new Vector3(Mathf.Clamp(_character.transform.position.x + _velocity.x, -_sideMaxDistance, _sideMaxDistance),
+                                        _character.transform.position.y,
+                                        _character.transform.position.z), _movementInput);
+            }
         }
 
         private void OnMovement(InputAction.CallbackContext context)
@@ -111,6 +136,35 @@ namespace GoblinzMechanics.Game
                 _movementInput = context.ReadValue<float>();
             }
         }
+
+        private void OnSwipeDown()
+        {
+            _character.Crouch();
+        }
+
+        private void OnSwipeUp()
+        {
+            if (_character.IsGrounded)
+            {
+                _character.Jump(Vector3.up * _characterJumpForce);
+            }
+        }
+
+        private void OnSwipeLeft()
+        {
+            _movementInput = Mathf.Clamp(_movementInput - 1, -1, 1);
+        }
+
+        private void OnSwipeRight()
+        {
+            _movementInput = Mathf.Clamp(_movementInput + 1, -1, 1);
+        }
+
+        private void OnLongTap()
+        {
+            LookSwitch();
+        }
+
         private void OnJump(InputAction.CallbackContext context)
         {
             if (context.action.name == _jumpActionName)
@@ -129,7 +183,8 @@ namespace GoblinzMechanics.Game
             }
         }
 
-        public void HandleRocketEnd() {
+        public void HandleRocketEnd()
+        {
             _character.HandleRocketEnd();
         }
     }
