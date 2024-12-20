@@ -13,6 +13,8 @@ namespace GoblinzMechanics.Game
         [SerializeField] private List<ComicsFrame> _startGameComics = new();
         [SerializeField] private List<ComicsFrame> _startSecondGameComics = new();
 
+        [SerializeField] private bool _skipAll = false;
+
         public UnityEvent OnAllComicsDone;
 
         private void Start()
@@ -22,7 +24,7 @@ namespace GoblinzMechanics.Game
 
         public IEnumerator StartGamePlay()
         {
-            if (GoblinGameStats.InstanceNonNull && !GoblinGameStats.Instance.fistPlay)
+            if (_skipAll || (GoblinGameStats.InstanceNonNull && !GoblinGameStats.Instance.fistPlay))
             {
                 OnAllComicsDone?.Invoke();
                 yield break;
