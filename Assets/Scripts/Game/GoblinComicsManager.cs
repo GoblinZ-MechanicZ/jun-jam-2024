@@ -10,8 +10,7 @@ namespace GoblinzMechanics.Game
     {
         [SerializeField] private AudioSource _comicsSource;
         [SerializeField] private float _fadeOutDuration = 0.5f;
-        [SerializeField] private List<ComicsFrame> _startGameComics = new();
-        [SerializeField] private List<ComicsFrame> _startSecondGameComics = new();
+        [SerializeField] private List<ComicsPage> _comicsPages = new();
 
         [SerializeField] private bool _skipAll = false;
 
@@ -30,8 +29,10 @@ namespace GoblinzMechanics.Game
                 yield break;
             }
 
-            yield return PlayComics(_startGameComics);
-            yield return PlayComics(_startSecondGameComics);
+            foreach (var comicsList in _comicsPages)
+            {
+                yield return PlayComics(comicsList.comicsParts);
+            }
             OnAllComicsDone?.Invoke();
         }
 
